@@ -1,0 +1,65 @@
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.dependencies import get_principal, require_roles
+from app.core.auth import Principal
+from app.db.database import get_db
+from app.schemas.resource_schema import (
+    InventoryItemCreate,
+    InventoryItemRead,
+    ResourceCategoryCreate,
+    ResourceCategoryRead,
+)
+from app.services import inventory as inventory_service
+
+router = APIRouter(prefix="/api/inventory", tags=["inventory"])
+
+
+@router.post(
+    "/categories", response_model=ResourceCategoryRead, status_code=status.HTTP_201_CREATED
+)
+def create_category(
+    data: ResourceCategoryCreate,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("tenant_admin")),
+):
+    return inventory_service.create_category(db, principal.tenant_id, data)
+
+
+@router.get("/categories", response_model=list[ResourceCategoryRead])
+def list_categories(
+    db: Session = Depends(get_db), principal: Principal = Depends(get_principal)
+):
+    return inventory_service.list_categories(db, principal.tenant_id)
+
+
+@router.post("/items", response_model=InventoryItemRead, status_code=status.HTTP_201_CREATED)
+def add_item(
+    data: InventoryItemCreate,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("tenant_admin", "coordinator")),
+):
+    return inventory_service.add_inventory_item(db, principal.tenant_id, data)
+
+
+@router.get("/items", response_model=list[InventoryItemRead])
+def list_items(
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("tenant_admin", "coordinator")),
+):
+    return inventory_service.list_inventory(db, principal.tenant_id)
+
+
+@router.post("/items/{item_id}/reserve", response_model=InventoryItemRead)
+def reserve(
+    item_id: uuid.UUID,
+    quantity: int,
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("tenant_admin", "coordinator")),
+):
+    try:
+        return inventory_service.reserve_stock(db, principal, item_id, quantity)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc))

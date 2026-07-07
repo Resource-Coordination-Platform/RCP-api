@@ -1,0 +1,138 @@
+{
+  "users": [
+    {
+      "name": "rcp",
+      "password_hash": "kI3GCoeHabWCK/LZQ5K/Y0wBuS6Vn6sTCUx/hRxUh5Bfi5mK",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ]
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "rcp"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "rcp",
+      "vhost": "rcp",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "rcp.events",
+      "vhost": "rcp",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "rcp.dlx",
+      "vhost": "rcp",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "logistics.iam-events.q",
+      "vhost": "rcp",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "rcp.dlx"
+      }
+    },
+    {
+      "name": "rto.domain-events.q",
+      "vhost": "rcp",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "rcp.dlx"
+      }
+    },
+    {
+      "name": "dlq.logistics.iam-events",
+      "vhost": "rcp",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "dlq.rto.domain-events",
+      "vhost": "rcp",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "rcp.events",
+      "vhost": "rcp",
+      "destination": "logistics.iam-events.q",
+      "destination_type": "queue",
+      "routing_key": "iam.user.*",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.events",
+      "vhost": "rcp",
+      "destination": "logistics.iam-events.q",
+      "destination_type": "queue",
+      "routing_key": "iam.tenant.*",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.events",
+      "vhost": "rcp",
+      "destination": "rto.domain-events.q",
+      "destination_type": "queue",
+      "routing_key": "logistics.#",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.events",
+      "vhost": "rcp",
+      "destination": "rto.domain-events.q",
+      "destination_type": "queue",
+      "routing_key": "iam.user.deactivated",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.events",
+      "vhost": "rcp",
+      "destination": "rto.domain-events.q",
+      "destination_type": "queue",
+      "routing_key": "iam.token.revoked",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.dlx",
+      "vhost": "rcp",
+      "destination": "dlq.logistics.iam-events",
+      "destination_type": "queue",
+      "routing_key": "iam.#",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.dlx",
+      "vhost": "rcp",
+      "destination": "dlq.rto.domain-events",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    }
+  ]
+}

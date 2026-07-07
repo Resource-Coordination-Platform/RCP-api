@@ -1,0 +1,66 @@
+asyncapi: 3.0.0
+info:
+  title: RCP Event Bus
+  version: 1.0.0
+  description: |
+    Broker topology for the Resource Coordination Platform.
+    Exchange: rcp.events (topic, durable). DLX: rcp.dlx.
+    Routing-key grammar: <producer>.<entity>.<action>.
+    All messages wrap their payload in the standard envelope
+    (events/envelope.schema.json).
+
+defaultContentType: application/json
+
+channels:
+  iam.user.registered:
+    address: iam.user.registered
+    messages:
+      userRegistered:
+        payload:
+          $ref: "./events/iam/user-registered.v1.schema.json"
+  iam.user.updated:
+    address: iam.user.updated
+    messages:
+      userUpdated:
+        payload:
+          $ref: "./events/iam/user-updated.v1.schema.json"
+  iam.user.deactivated:
+    address: iam.user.deactivated
+  iam.tenant.created:
+    address: iam.tenant.created
+  iam.tenant.suspended:
+    address: iam.tenant.suspended
+  iam.token.revoked:
+    address: iam.token.revoked
+  logistics.task.assigned:
+    address: logistics.task.assigned
+    messages:
+      taskAssigned:
+        payload:
+          $ref: "./events/logistics/task-assigned.v1.schema.json"
+  logistics.task.status-changed:
+    address: logistics.task.status-changed
+  logistics.request.submitted:
+    address: logistics.request.submitted
+  logistics.request.status-changed:
+    address: logistics.request.status-changed
+  logistics.inventory.low-stock:
+    address: logistics.inventory.low-stock
+  logistics.offer.status-changed:
+    address: logistics.offer.status-changed
+  rto.delivery.acknowledged:
+    address: rto.delivery.acknowledged
+  rto.device.registered:
+    address: rto.device.registered
+
+operations:
+  logisticsConsumesIamEvents:
+    action: receive
+    summary: "Queue logistics.iam-events.q <- iam.user.*, iam.tenant.*"
+    channel:
+      $ref: "#/channels/iam.user.registered"
+  rtoConsumesDomainEvents:
+    action: receive
+    summary: "Queue rto.domain-events.q <- logistics.#, iam.user.deactivated, iam.token.revoked"
+    channel:
+      $ref: "#/channels/logistics.task.assigned"

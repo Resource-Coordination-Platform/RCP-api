@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/logistics/task-assigned.v1.schema.json",
+  "title": "logistics.task.assigned v1 (data payload)",
+  "type": "object",
+  "required": ["task_id", "request_id", "title", "priority", "volunteer", "assigned_by", "assigned_at"],
+  "properties": {
+    "task_id": { "type": "string", "format": "uuid" },
+    "request_id": { "type": "string", "format": "uuid" },
+    "title": { "type": "string", "maxLength": 200 },
+    "instructions": { "type": ["string", "null"] },
+    "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "category": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" }
+      }
+    },
+    "location": {
+      "type": ["object", "null"],
+      "properties": {
+        "area": { "type": ["string", "null"] },
+        "lat": { "type": ["number", "null"] },
+        "lng": { "type": ["number", "null"] }
+      }
+    },
+    "volunteer": {
+      "type": "object",
+      "required": ["user_id"],
+      "properties": {
+        "user_id": { "type": "string", "format": "uuid" },
+        "full_name": { "type": ["string", "null"] }
+      }
+    },
+    "assigned_by": {
+      "type": "object",
+      "required": ["user_id"],
+      "properties": {
+        "user_id": { "type": "string", "format": "uuid" },
+        "full_name": { "type": ["string", "null"] }
+      }
+    },
+    "assigned_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": ["string", "null"], "format": "date-time" }
+  }
+}

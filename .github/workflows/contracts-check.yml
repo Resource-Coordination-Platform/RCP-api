@@ -1,0 +1,32 @@
+name: contracts-check
+
+on:
+  pull_request:
+    paths:
+      - "packages/contracts/**"
+
+jobs:
+  breaking-change-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Published event schemas are immutable
+        run: |
+          # A published schema version (events/**/*.vN.schema.json) may be
+          # added but never edited in place — breaking changes require a
+          # new .vN+1 file. Fail if any existing versioned schema changed.
+          BASE="origin/${{ github.base_ref }}"
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only --diff-filter=M "$BASE"...HEAD -- 'packages/contracts/events/**/*.schema.json' || true)
+          if [ -n "$CHANGED" ]; then
+            echo "::error::In-place edits to published event schemas:"
+            echo "$CHANGED"
+            exit 1
+          fi
+      - name: Validate schemas are well-formed JSON
+        run: |
+          for f in $(find packages/contracts/events -name '*.json'); do
+            python -m json.tool "$f" > /dev/null || exit 1
+          done

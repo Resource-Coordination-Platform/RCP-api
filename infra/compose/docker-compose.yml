@@ -1,0 +1,89 @@
+name: rcp
+
+x-common-env: &common-env
+  RABBITMQ_URL: amqp://rcp:rcp_local_pw@rabbitmq:5672/rcp
+  JWT_JWKS_URL: http://iam:8000/.well-known/jwks.json
+  ENVIRONMENT: local
+
+services:
+  db:
+    # Plain Postgres is sufficient locally because services speak pure SQL.
+    # For full Supabase parity (dashboard, storage), run `supabase start`
+    # instead and point DATABASE_URLs at its exposed port.
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: rcp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_local_pw
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rcp"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    hostname: rcp-rabbit
+    environment:
+      RABBITMQ_DEFAULT_USER: rcp
+      RABBITMQ_DEFAULT_PASS: rcp_local_pw
+      RABBITMQ_DEFAULT_VHOST: rcp
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # Topology (exchanges, quorum queues, DLX) is declared idempotently by
+    # the services on startup; rabbitmq/definitions.json is the same
+    # topology for importing into a managed cluster in production.
+
+  iam:
+    build: ../../services/iam
+    environment:
+      <<: *common-env
+      DATABASE_URL: postgresql+psycopg2://svc_iam:iam_local_pw@db:5432/rcp
+      JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_signing_key
+    ports: ["8001:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    secrets: [jwt_signing_key]
+
+  logistics:
+    build: ../../services/logistics
+    environment:
+      <<: *common-env
+      DATABASE_URL: postgresql+psycopg2://svc_logistics:logistics_local_pw@db:5432/rcp
+    ports: ["8002:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      iam: { condition: service_started }
+
+  rto:
+    build: ../../services/rto
+    environment:
+      <<: *common-env
+      DATABASE_URL: postgres://svc_rto:rto_local_pw@db:5432/rcp
+    ports: ["8080:8080"]
+    depends_on:
+      db: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      iam: { condition: service_started }
+
+secrets:
+  jwt_signing_key:
+    file: ./secrets/jwt_dev_key.pem
+
+volumes:
+  pgdata:
+  rabbitdata:

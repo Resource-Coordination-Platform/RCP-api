@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/envelope.schema.json",
+  "title": "RCP Event Envelope",
+  "type": "object",
+  "required": ["event_id", "event_type", "schema_version", "occurred_at", "tenant_id", "producer", "data"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid", "description": "Producer-generated; the consumer idempotency key" },
+    "event_type": { "type": "string", "pattern": "^[a-z]+\\.[a-z-]+\\.[a-z-]+$", "description": "<producer>.<entity>.<action>, mirrors the routing key" },
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "tenant_id": { "type": "string", "format": "uuid" },
+    "producer": { "type": "string", "enum": ["iam-service", "logistics-service", "rto-service"] },
+    "trace_id": { "type": "string", "description": "W3C traceparent" },
+    "data": { "type": "object" }
+  },
+  "additionalProperties": false
+}
