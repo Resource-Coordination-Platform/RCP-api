@@ -49,6 +49,9 @@ async def forward(request: Request) -> Response:
         for key, value in request.headers.items()
         if key.lower() not in _HOP_BY_HOP
     }
+    traceparent = getattr(request.state, "traceparent", None)
+    if traceparent:
+        headers["traceparent"] = traceparent
     if request.client:
         headers["X-Forwarded-For"] = request.client.host
 

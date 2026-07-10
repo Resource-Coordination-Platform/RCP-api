@@ -13,6 +13,7 @@ class Settings(BaseServiceSettings):
     # simple in-memory token bucket, per client IP
     RATE_LIMIT_RPS: float = 20.0
     RATE_LIMIT_BURST: int = 60
+    REDIS_URL: str = ""
 
     PROXY_TIMEOUT_SECONDS: float = 30.0
 

@@ -2,14 +2,18 @@ import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi import WebSocket
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from rcp_clients import AnalyticsClient, IAMClient, LogisticsClient, ServiceClient
 from rcp_common.logging import configure_logging
 from rcp_common.middleware import RequestContextMiddleware
+from rcp_common.metrics import render_prometheus_metrics
 
 from app.core.config import ROUTE_TABLE, settings
 from app.proxy import close_client, forward
 from app.ratelimit import RateLimitMiddleware
+from app.ws_proxy import proxy_ws
 
 configure_logging(settings.SERVICE_NAME, settings.LOG_LEVEL)
 
@@ -21,6 +25,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="RCP API Gateway", lifespan=lifespan)
+app.state.service_name = settings.SERVICE_NAME
 
 app.add_middleware(RequestContextMiddleware)
 app.add_middleware(RateLimitMiddleware)
@@ -43,6 +48,11 @@ _service_clients: dict[str, ServiceClient] = {
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": settings.SERVICE_NAME}
+
+
+@app.get("/metrics")
+async def metrics():
+    return Response(render_prometheus_metrics(settings.SERVICE_NAME), media_type="text/plain; version=0.0.4")
 
 
 @app.get("/liveness")
@@ -69,6 +79,11 @@ async def services_health():
 async def routes():
     """The active routing table (debugging aid; no secrets involved)."""
     return ROUTE_TABLE
+
+
+@app.websocket("/ws")
+async def ws_proxy(websocket: WebSocket):
+    await proxy_ws(websocket)
 
 
 @app.api_route(

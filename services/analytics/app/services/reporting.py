@@ -1,13 +1,8 @@
 """'Need vs. Fulfillment' read-model queries for the admin dashboard.
 
-Analytics owns no transactional data. It reads the logistics schema through
-a SELECT-only database role (svc_analytics) — a read model, never a write
-path. Queries are plain SQL so this service carries no copy of the
-logistics ORM models.
-
-NOTE: SQLAlchemy enum columns store the *names* of the Python enum members
-(e.g. 'PENDING', 'IN_PROGRESS'); the API contract exposes the *values*
-('pending', 'in_progress'), which for these enums is exactly lower(name).
+Analytics now owns its own projection tables in schema_analytics and is
+fed by logistics events over RabbitMQ. The service no longer queries the
+logistics database directly.
 """
 
 import uuid
@@ -17,24 +12,24 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 
-_SCHEMA = settings.LOGISTICS_SCHEMA
+_SCHEMA = "schema_analytics"
 
-_OPEN_STATUSES = ["PENDING", "VERIFIED", "APPROVED", "IN_PROGRESS"]
+_OPEN_STATUSES = ["pending", "verified", "approved", "in_progress"]
 
 _NEED_VS_FULFILLMENT_SQL = text(
     f"""
     SELECT
-        c.id AS category_id,
+        c.category_id AS category_id,
         c.name AS category,
-        COUNT(r.id) FILTER (WHERE r.status::text IN :open_statuses) AS open_requests,
-        COUNT(r.id) FILTER (WHERE r.status::text = 'FULFILLED') AS fulfilled_requests,
+        COUNT(r.request_id) FILTER (WHERE r.status IN :open_statuses) AS open_requests,
+        COUNT(r.request_id) FILTER (WHERE r.status = 'fulfilled') AS fulfilled_requests,
         COALESCE(
-            SUM(r.quantity_needed) FILTER (WHERE r.status::text IN :open_statuses), 0
+            SUM(r.quantity_needed) FILTER (WHERE r.status IN :open_statuses), 0
         ) AS quantity_needed
-    FROM {_SCHEMA}.resource_categories c
-    LEFT JOIN {_SCHEMA}.help_requests r ON r.category_id = c.id
+    FROM {_SCHEMA}.analytics_categories c
+    LEFT JOIN {_SCHEMA}.analytics_requests r ON r.category_id = c.category_id
     WHERE c.tenant_id = :tenant_id
-    GROUP BY c.id, c.name
+    GROUP BY c.category_id, c.name
     ORDER BY c.name
     """
 ).bindparams(bindparam("open_statuses", expanding=True))
@@ -44,7 +39,7 @@ _STOCK_SQL = text(
     SELECT
         i.category_id,
         COALESCE(SUM(i.quantity_total - i.quantity_reserved), 0) AS stock_available
-    FROM {_SCHEMA}.inventory_items i
+    FROM {_SCHEMA}.analytics_inventory_items i
     WHERE i.tenant_id = :tenant_id
     GROUP BY i.category_id
     """
@@ -52,8 +47,8 @@ _STOCK_SQL = text(
 
 _STATUS_SUMMARY_SQL = text(
     f"""
-    SELECT lower(r.status::text) AS status, COUNT(r.id) AS total
-    FROM {_SCHEMA}.help_requests r
+    SELECT r.status AS status, COUNT(r.request_id) AS total
+    FROM {_SCHEMA}.analytics_requests r
     WHERE r.tenant_id = :tenant_id
     GROUP BY r.status
     """

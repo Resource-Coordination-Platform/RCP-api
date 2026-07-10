@@ -3,12 +3,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.responses import Response
 from rcp_common.logging import configure_logging
 from rcp_common.middleware import RequestContextMiddleware
+from rcp_common.metrics import render_prometheus_metrics
 
 from app.api import routes_reports
 from app.core.config import settings
 from app.db.database import engine
+from app.events.consumer import start_consumer
 
 configure_logging(settings.SERVICE_NAME, settings.LOG_LEVEL)
 
@@ -16,11 +19,14 @@ configure_logging(settings.SERVICE_NAME, settings.LOG_LEVEL)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # schema_analytics objects are managed by Alembic (make migrate-analytics);
-    # the logistics read model is owned and migrated by the logistics service.
+    # the analytics read model is owned and migrated by this service.
+    stop_consumer = start_consumer()
     yield
+    stop_consumer.set()
 
 
 app = FastAPI(title="RCP Analytics Service", lifespan=lifespan)
+app.state.service_name = settings.SERVICE_NAME
 
 app.add_middleware(RequestContextMiddleware)
 app.add_middleware(
@@ -46,6 +52,15 @@ def _database_ready() -> bool:
 @app.get("/health")
 def health():
     return {"status": "ok", "service": settings.SERVICE_NAME}
+
+
+@app.get("/metrics")
+def metrics():
+    checked_out = getattr(engine.pool, "checkedout", lambda: 0)()
+    return Response(
+        render_prometheus_metrics(settings.SERVICE_NAME, database_connections=checked_out),
+        media_type="text/plain; version=0.0.4",
+    )
 
 
 @app.get("/liveness")

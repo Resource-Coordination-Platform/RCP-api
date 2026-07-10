@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import Response
 from fastapi.responses import JSONResponse
 from rcp_common.logging import configure_logging
 from rcp_common.middleware import RequestContextMiddleware
+from rcp_common.metrics import render_prometheus_metrics
 
 from app.api import routes_auth, routes_jwks
 from app.core.config import settings
@@ -26,6 +28,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="RCP IAM Service", lifespan=lifespan)
+app.state.service_name = settings.SERVICE_NAME
 
 app.add_middleware(RequestContextMiddleware)
 
@@ -45,6 +48,15 @@ def _database_ready() -> bool:
 @app.get("/health")
 def health():
     return {"status": "ok", "service": settings.SERVICE_NAME}
+
+
+@app.get("/metrics")
+def metrics():
+    checked_out = getattr(engine.pool, "checkedout", lambda: 0)()
+    return Response(
+        render_prometheus_metrics(settings.SERVICE_NAME, database_connections=checked_out),
+        media_type="text/plain; version=0.0.4",
+    )
 
 
 @app.get("/liveness")

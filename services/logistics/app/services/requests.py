@@ -37,6 +37,8 @@ def create_request(db: Session, principal: Principal, data: HelpRequestCreate) -
             "urgency": request.urgency.value,
             "quantity_needed": request.quantity_needed,
             "area": request.area,
+            "status": request.status.value,
+            "updated_at": request.created_at.isoformat() if request.created_at else None,
         },
     )
     db.commit()
@@ -96,12 +98,16 @@ def change_status(
         tenant_id=request.tenant_id,
         data={
             "request_id": str(request.id),
+            "category_id": str(request.category_id),
+            "quantity_needed": request.quantity_needed,
+            "status": new_status.value,
             "old_status": old_status.value,
             "new_status": new_status.value,
             "requester_user_id": (
                 str(request.requester_user_id) if request.requester_user_id else None
             ),
             "changed_by_user_id": str(principal.user_id),
+            "updated_at": now.isoformat(),
         },
     )
     db.commit()

@@ -18,6 +18,21 @@ def create_category(
 ) -> ResourceCategory:
     category = ResourceCategory(tenant_id=tenant_id, **data.model_dump())
     db.add(category)
+    db.flush()
+    now = category.created_at
+    emit(
+        db,
+        routing_key="logistics.resource-category.created",
+        tenant_id=tenant_id,
+        data={
+            "category_id": str(category.id),
+            "name": category.name,
+            "description": category.description,
+            "unit": category.unit,
+            "is_active": category.is_active,
+            "updated_at": now.isoformat() if now else None,
+        },
+    )
     db.commit()
     db.refresh(category)
     return category
@@ -41,6 +56,23 @@ def add_inventory_item(
 ) -> InventoryItem:
     item = InventoryItem(tenant_id=tenant_id, **data.model_dump())
     db.add(item)
+    db.flush()
+    now = item.created_at
+    emit(
+        db,
+        routing_key="logistics.inventory.item-updated",
+        tenant_id=tenant_id,
+        data={
+            "item_id": str(item.id),
+            "category_id": str(item.category_id),
+            "name": item.name,
+            "quantity_total": item.quantity_total,
+            "quantity_reserved": item.quantity_reserved,
+            "quantity_available": item.quantity_available,
+            "status": item.status.value,
+            "updated_at": now.isoformat() if now else None,
+        },
+    )
     db.commit()
     db.refresh(item)
     return item
@@ -86,6 +118,22 @@ def reserve_stock(
                 "quantity_available": item.quantity_available,
             },
         )
+    now = item.updated_at
+    emit(
+        db,
+        routing_key="logistics.inventory.item-updated",
+        tenant_id=principal.tenant_id,
+        data={
+            "item_id": str(item.id),
+            "category_id": str(item.category_id),
+            "name": item.name,
+            "quantity_total": item.quantity_total,
+            "quantity_reserved": item.quantity_reserved,
+            "quantity_available": item.quantity_available,
+            "status": item.status.value,
+            "updated_at": now.isoformat() if now else None,
+        },
+    )
     db.commit()
     db.refresh(item)
     return item
@@ -105,6 +153,22 @@ def release_stock(
     item.quantity_reserved = max(0, item.quantity_reserved - quantity)
     if item.quantity_available > 0 and item.status == InventoryStatus.RESERVED:
         item.status = InventoryStatus.AVAILABLE
+    now = item.updated_at
+    emit(
+        db,
+        routing_key="logistics.inventory.item-updated",
+        tenant_id=tenant_id,
+        data={
+            "item_id": str(item.id),
+            "category_id": str(item.category_id),
+            "name": item.name,
+            "quantity_total": item.quantity_total,
+            "quantity_reserved": item.quantity_reserved,
+            "quantity_available": item.quantity_available,
+            "status": item.status.value,
+            "updated_at": now.isoformat() if now else None,
+        },
+    )
     db.commit()
     db.refresh(item)
     return item

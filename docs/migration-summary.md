@@ -76,8 +76,8 @@ packages, monitoring, and deletion of all legacy code.
 - `services/logistics/app/api/routes_reports.py` → `services/analytics/app/api/routes_reports.py`
   (same endpoints, paths, and role requirements — API preserved)
 - `services/logistics/app/services/reporting.py` → `services/analytics/app/services/reporting.py`
-  (rewritten as read-only SQL against the `schema_logistics` read model so
-  analytics carries no copy of the logistics ORM)
+   (rewritten as analytics-owned projection queries over `schema_analytics`; the
+   analytics consumer materializes logistics events into that schema)
 - `services/logistics/app/core/auth.py` (JWKS verify, ~80 vendored lines) →
   `packages/common/rcp_common/auth.py`; the logistics module now just binds
   it to its settings
@@ -137,20 +137,16 @@ packages, monitoring, and deletion of all legacy code.
 1. **Existing local Postgres volumes** predate `schema_analytics`: run the
    new statements from `infra/compose/db-init/01-schemas-roles.sql` against
    the volume once, or `docker compose down -v && make up`.
-2. **Event-driven projections in analytics**: the `processed_events`
-   ledger and RabbitMQ wiring exist, but a consumer that materializes
-   aggregates into `schema_analytics` has not been built — dashboards
-   currently query the logistics read model live.
-3. **/metrics endpoints**: Prometheus currently only gets `up` liveness from
-   `/health` scrapes; add `prometheus-fastapi-instrumentator` (Python) and
-   `promhttp` (Go), then point `prometheus.yml` at `/metrics`.
-4. **Gateway rate limiting is in-memory** — move buckets to Redis before
-   running more than one gateway replica.
-5. **WebSocket traffic bypasses the gateway** (clients connect to RTO
-   directly); front both with nginx/ALB in production if a single origin is
-   required.
-6. **Old JWTs & tests**: iam/logistics test suites are still empty
-   scaffolds; the gateway and analytics ship with first smoke tests —
-   extend per service.
-7. `docs/architecture-blueprint.md` still describes a `ts-shared` package
+2. **Distributed tracing export**: `traceparent` propagation is now in place,
+   but production still needs an OpenTelemetry pipeline (Jaeger/Tempo or
+   equivalent) to visualize full end-to-end traces.
+3. **Gateway rate limiting deployment**: Redis-backed shared counters are
+   implemented, but production should set `REDIS_URL` and run Redis so the
+   limiter stays correct across multiple gateway replicas.
+4. **WebSocket front door**: the gateway now proxies `/ws`, but if a single
+   origin is required in production, front the gateway and RTO with the same
+   edge proxy / ALB / ingress configuration.
+5. **Old JWTs & tests**: iam/logistics test suites are still light-weight
+   scaffolds; extend them before release.
+6. `docs/architecture-blueprint.md` still describes a `ts-shared` package
    and codegen pipeline that have not been built.
