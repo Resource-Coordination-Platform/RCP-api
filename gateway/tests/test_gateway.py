@@ -12,6 +12,15 @@ def test_health():
     assert response.json()["service"] == "api-gateway"
 
 
+def test_probe_endpoints_exist():
+    with TestClient(app) as client:
+        readiness = client.get("/readiness")
+        liveness = client.get("/liveness")
+    assert readiness.status_code == 200
+    assert readiness.json()["status"] in {"ok", "degraded"}
+    assert liveness.status_code == 200
+
+
 def test_route_resolution():
     assert resolve_upstream("/api/auth/login") == settings.IAM_URL
     assert resolve_upstream("/.well-known/jwks.json") == settings.IAM_URL

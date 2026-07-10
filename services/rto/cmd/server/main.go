@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/rcp-platform/services/rto/internal/auth"
 	"github.com/rcp-platform/services/rto/internal/config"
@@ -54,6 +55,29 @@ func main() {
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "service": "rto-service"})
+	})
+	mux.HandleFunc("/liveness", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "service": "rto-service"})
+	})
+	mux.HandleFunc("/readiness", func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+		defer cancel()
+		w.Header().Set("Content-Type", "application/json")
+		if err := st.Pool.Ping(ctx); err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]any{
+				"status": "degraded",
+				"service": "rto-service",
+				"checks":  map[string]string{"database": "unavailable"},
+			})
+			return
+		}
+		json.NewEncoder(w).Encode(map[string]any{
+			"status": "ok",
+			"service": "rto-service",
+			"checks":  map[string]string{"database": "ok"},
+		})
 	})
 
 	//start web server

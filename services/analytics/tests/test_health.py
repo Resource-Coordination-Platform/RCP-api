@@ -10,3 +10,11 @@ def test_health():
     body = response.json()
     assert body["status"] == "ok"
     assert body["service"] == "analytics-service"
+
+
+def test_probe_endpoints_exist():
+    with TestClient(app) as client:
+        readiness = client.get("/readiness")
+        liveness = client.get("/liveness")
+    assert readiness.status_code in {200, 503}
+    assert liveness.status_code == 200

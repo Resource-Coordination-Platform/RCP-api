@@ -32,7 +32,9 @@ class ServiceClient:
 
     async def health(self) -> dict:
         try:
-            response = await self.get("/health")
+            response = await self.get("/readiness")
+            if response.status_code == 404:
+                response = await self.get("/health")
             body = response.json() if response.status_code == 200 else {}
             return {"status": body.get("status", "degraded"), "http_status": response.status_code}
         except httpx.HTTPError as exc:

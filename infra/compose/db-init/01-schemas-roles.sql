@@ -40,6 +40,9 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA schema_analytics
 -- the logistics schema as a *read model* — SELECT only, never write.
 GRANT USAGE ON SCHEMA schema_logistics TO svc_analytics;
 GRANT SELECT ON ALL TABLES IN SCHEMA schema_logistics TO svc_analytics;
+-- On Supabase, postgres is not a true superuser: wrap the next statement in
+-- GRANT svc_logistics TO postgres; ... REVOKE svc_logistics FROM postgres;
+-- (see infra/supabase/add-analytics-schema.sql)
 ALTER DEFAULT PRIVILEGES FOR ROLE svc_logistics IN SCHEMA schema_logistics
   GRANT SELECT ON TABLES TO svc_analytics;
 

@@ -1,6 +1,6 @@
 # Local Prometheus scrape config for the RCP stack.
 # Service /metrics endpoints are a pending TODO (see docs/migration-summary.md);
-# until they land, the blackbox-style /health scrapes below still surface
+# until they land, the blackbox-style /readiness scrapes below still surface
 # liveness through the `up` metric per target.
 
 global:
@@ -9,27 +9,27 @@ global:
 
 scrape_configs:
   - job_name: gateway
-    metrics_path: /health
+    metrics_path: /readiness
     static_configs:
       - targets: ["gateway:8000"]
 
   - job_name: iam
-    metrics_path: /health
+    metrics_path: /readiness
     static_configs:
       - targets: ["iam:8000"]
 
   - job_name: logistics
-    metrics_path: /health
+    metrics_path: /readiness
     static_configs:
       - targets: ["logistics:8000"]
 
   - job_name: analytics
-    metrics_path: /health
+    metrics_path: /readiness
     static_configs:
       - targets: ["analytics:8000"]
 
   - job_name: rto
-    metrics_path: /health
+    metrics_path: /readiness
     static_configs:
       - targets: ["rto:8080"]
 

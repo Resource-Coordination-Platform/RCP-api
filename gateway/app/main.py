@@ -45,14 +45,24 @@ async def health():
     return {"status": "ok", "service": settings.SERVICE_NAME}
 
 
-@app.get("/health/services")
-async def services_health():
-    """Aggregated platform health — the gateway's only fan-out endpoint."""
+@app.get("/liveness")
+async def liveness():
+    return {"status": "ok", "service": settings.SERVICE_NAME}
+
+
+@app.get("/readiness")
+async def readiness():
+    """Aggregated platform readiness — the gateway's fan-out endpoint."""
     names = list(_service_clients)
     results = await asyncio.gather(*(_service_clients[n].health() for n in names))
     statuses = dict(zip(names, results))
     overall = "ok" if all(s.get("status") == "ok" for s in statuses.values()) else "degraded"
     return {"status": overall, "services": statuses}
+
+
+@app.get("/health/services")
+async def services_health():
+    return await readiness()
 
 
 @app.get("/routes")
