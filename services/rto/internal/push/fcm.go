@@ -3,7 +3,7 @@ package push
 
 import (
 	"context"
-	"log"
+	"log/slog"
 
 	"github.com/google/uuid"
 )
@@ -18,5 +18,5 @@ type Sender interface {
 type LogSender struct{}
 
 func (LogSender) Send(_ context.Context, tenantID, userID uuid.UUID, title string, _ []byte) {
-	log.Printf("push (dev log only): tenant=%s user=%s title=%q", tenantID, userID, title)
+	slog.Info("push (dev log only)", "tenant", tenantID, "user", userID, "title", title)
 }

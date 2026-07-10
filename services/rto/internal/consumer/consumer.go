@@ -6,7 +6,7 @@ package consumer
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
@@ -81,7 +81,7 @@ func (c *Consumer) declareTopology(ch *amqp.Channel) error {
 func (c *Consumer) Run(ctx context.Context) {
 	for ctx.Err() == nil {
 		if err := c.consumeOnce(ctx); err != nil {
-			log.Printf("consumer disconnected: %v; retrying", err)
+			slog.Warn("consumer disconnected; retrying", "err", err)
 		}
 		select {
 		case <-ctx.Done():
@@ -113,7 +113,7 @@ func (c *Consumer) consumeOnce(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("consuming %s", c.cfg.Queue)
+	slog.Info("consuming", "queue", c.cfg.Queue)
 
 	for {
 		select {
@@ -124,7 +124,7 @@ func (c *Consumer) consumeOnce(ctx context.Context) error {
 				return amqp.ErrClosed
 			}
 			if err := c.handle(ctx, delivery.Body); err != nil {
-				log.Printf("event failed, dead-lettering: %v", err)
+				slog.Error("event failed, dead-lettering", "err", err)
 				delivery.Nack(false, false) // -> DLQ via the queue's DLX
 			} else {
 				delivery.Ack(false)

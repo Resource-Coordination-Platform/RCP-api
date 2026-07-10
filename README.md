@@ -8,41 +8,50 @@ dispatch — multi-tenant, event-driven, offline-first.
 dashboard, Flutter volunteer app) live in a separate repository and consume
 the APIs and WebSocket endpoints documented here.
 
-Full design: [docs/architecture-blueprint.md](docs/architecture-blueprint.md)
+Full design: [docs/architecture-blueprint.md](docs/architecture-blueprint.md) ·
+Migration record: [docs/migration-summary.md](docs/migration-summary.md)
 
 ## Architecture at a glance
 
 | Service | Stack | Schema | Role |
 |---|---|---|---|
+| `gateway` | FastAPI | — | API gateway: routing, auth forwarding, rate limiting, CORS |
 | `services/iam` | FastAPI | `schema_iam` | Tenants, users, RBAC, RS256 JWT + JWKS |
-| `services/logistics` | FastAPI | `schema_logistics` | Categories, inventory, requests, dispatch |
+| `services/logistics` | FastAPI | `schema_logistics` | Categories, inventory, requests, offers, volunteers, dispatch |
+| `services/analytics` | FastAPI | `schema_analytics` | Dashboards, KPIs, reports — read-only projections |
 | `services/rto` | Go | `schema_rto` | WebSockets, notifications, offline sync, push |
 
 Communication: RabbitMQ topic exchange `rcp.events` (quorum queues,
-transactional outbox, idempotent consumers — no message loss).
+transactional outbox, idempotent consumers — no message loss). Analytics
+additionally reads the logistics schema through a SELECT-only role (read
+model); it owns no transactional business logic.
 Contracts: `packages/contracts` (versioned JSON Schemas, AsyncAPI) — the
 frontend repository should consume these + each service's OpenAPI docs
-(`/docs` on IAM :8001 and Logistics :8002).
+(`/docs` on every HTTP service).
 
 ## Quickstart (local)
 
 ```bash
 # 1. bring up everything: Postgres (schemas+roles auto-created), RabbitMQ,
-#    IAM :8001, Logistics :8002, RTO :8080 (ws)
+#    Gateway :8000, IAM :8001, Logistics :8002, Analytics :8003, RTO :8080 (ws)
 make up            # or: docker compose -f infra/compose/docker-compose.yml up -d --build
+# optional: make up-monitoring   # + Prometheus :9090, Grafana :3001
 
-# 2. onboard a tenant + admin
-curl -X POST http://localhost:8001/api/auth/tenants -H 'Content-Type: application/json' -d '{
+# 2. onboard a tenant + admin (through the gateway)
+curl -X POST http://localhost:8000/api/auth/tenants -H 'Content-Type: application/json' -d '{
   "name": "Kolonnawa Mutual Aid", "slug": "kolonnawa",
   "admin_email": "admin@example.org", "admin_password": "change-me-now",
   "admin_full_name": "Coordinator Fernando"
 }'
 
-# 3. login -> use access_token as Bearer against Logistics :8002
-curl -X POST http://localhost:8001/api/auth/login -H 'Content-Type: application/json' -d '{
+# 3. login -> use access_token as Bearer against any /api/* route on :8000
+curl -X POST http://localhost:8000/api/auth/login -H 'Content-Type: application/json' -d '{
   "tenant_slug": "kolonnawa", "email": "admin@example.org", "password": "change-me-now"
 }'
 ```
+
+Services remain individually reachable on :8001–:8003 for debugging; clients
+should only talk to the gateway (:8000) and the RTO WebSocket (:8080).
 
 RabbitMQ management UI: http://localhost:15672 (rcp / rcp_local_pw).
 
@@ -53,19 +62,25 @@ subprotocols `["bearer", <access_token>]`; send
 ## Repository layout
 
 ```
-services/           iam, logistics (FastAPI) · rto (Go)
+gateway/            API gateway (FastAPI) — routing, rate limiting, CORS
+services/           iam, logistics, analytics (FastAPI) · rto (Go)
 packages/contracts/ event schemas + AsyncAPI — the source of truth
-infra/compose/      local stack, db-init SQL, rabbitmq definitions
+packages/common/    rcp-common: logging, middleware, exceptions, config, JWKS auth
+packages/clients/   rcp-clients: HTTP clients for service-to-service calls
+infra/compose/      local stack, db-init SQL, rabbitmq definitions, monitoring overlay
+infra/docker/       image build conventions
+infra/monitoring/   prometheus + grafana configuration
 infra/terraform/    modules + envs (dev/staging/prod) + globals
 .github/workflows/  path-filtered CI per service + contracts guard
 ```
 
-CORS for the separate frontend repo: Logistics allows `http://localhost:3000`
-by default (`CORS_ORIGINS` in `services/logistics/app/core/config.py`).
+Local Python dev: `make install-packages` (editable installs of
+`packages/common` and `packages/clients`) before running services outside
+Docker.
 
-## Migration note
+CORS for the separate frontend repo is handled at the gateway
+(`CORS_ORIGINS` in `gateway/app/core/config.py`; defaults to
+`http://localhost:3000`).
 
-`RCP-api/` is the superseded single-service prototype (kept for reference;
-its code was split into `services/iam` + `services/logistics`, and its
-WebSocket layer was rewritten in Go as `services/rto`). Delete it once the
-team is comfortable with the new layout.
+For the folder structure conventions per service, see
+[docs/microservice-folder-structure.md](docs/microservice-folder-structure.md).

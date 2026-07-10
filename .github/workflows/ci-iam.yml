@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - "services/iam/**"
+      - "packages/common/**"
       - "packages/contracts/**"
   push:
     branches: [main]
     paths:
       - "services/iam/**"
+      - "packages/common/**"
       - "packages/contracts/**"
 
 jobs:
@@ -22,7 +24,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt ../../packages/common
       - run: python -m pytest tests -q
       - name: Verify ORM mappings configure
         run: |
@@ -35,6 +37,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image
-        run: docker build -t rcp/iam:${{ github.sha }} services/iam
+        run: docker build -f services/iam/Dockerfile -t rcp/iam:${{ github.sha }} .
       # push to ECR + update the ECS task definition happens here in the
       # deploy step (see infra/terraform README) — deploys are CI, not TF

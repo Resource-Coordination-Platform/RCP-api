@@ -139,7 +139,8 @@ rcp-platform/
 │   │   │   ├── logistics/task-assigned.v1.schema.json
 │   │   │   └── ...                     # one file per event, versioned in the name
 │   │   └── codegen/                    # generates Pydantic models + Go structs in CI
-│   ├── py-shared/                      # pip-installable: envelope, outbox, jwt deps
+│   ├── common/                         # pip-installable rcp-common: logging, auth, config
+│   ├── clients/                        # pip-installable rcp-clients: service HTTP clients
 │   └── ts-shared/                      # shared TS types for web-admin
 │
 ├── infra/
@@ -688,7 +689,7 @@ module "runtime" {
 
 ## Appendix A — Migration note from the current codebase
 
-The existing `RCP-api/backend` (single FastAPI app) maps onto this blueprint as:
+The legacy `RCP-api/backend` (single FastAPI app, since deleted) mapped onto this blueprint as:
 - `app/models/tenant.py`, `user.py`, `core/security.py` → `services/iam`
 - `app/models/{resource,request,offer,task,volunteer}.py`, `services/*` → `services/logistics`
 - `app/websockets/*`, `app/models/notification.py` → rewritten in Go under `services/rto`

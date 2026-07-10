@@ -1,13 +1,16 @@
+# Build from the repository root so packages/ is reachable:
+#   docker build -f services/logistics/Dockerfile .
 FROM python:3.12-slim
 
 WORKDIR /srv
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY packages/common ./packages/common
+COPY services/logistics/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt ./packages/common
 
-COPY app ./app
-COPY migrations ./migrations
-COPY alembic.ini .
+COPY services/logistics/app ./app
+COPY services/logistics/migrations ./migrations
+COPY services/logistics/alembic.ini .
 
 EXPOSE 8000
 

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -31,7 +31,7 @@ func getenv(key, fallback string) string {
 
 func Load() Config {
 	if err := godotenv.Load(); err != nil {
-		log.Printf("No .env file found or error loading it: %v", err)
+		slog.Info("no .env file found; using process environment", "err", err)
 	}
 	return Config{
 		ListenAddr:  getenv("LISTEN_ADDR", ":8080"),

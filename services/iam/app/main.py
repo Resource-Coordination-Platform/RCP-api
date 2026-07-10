@@ -1,7 +1,8 @@
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from rcp_common.logging import configure_logging
+from rcp_common.middleware import RequestContextMiddleware
 
 from app.api import routes_auth, routes_jwks
 from app.core.config import settings
@@ -10,7 +11,7 @@ from app.db.database import engine
 from app.events.relay import start_relay
 from app.models import Base
 
-logging.basicConfig(level=logging.INFO)
+configure_logging(settings.SERVICE_NAME, settings.LOG_LEVEL)
 
 
 @asynccontextmanager
@@ -24,6 +25,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="RCP IAM Service", lifespan=lifespan)
+
+app.add_middleware(RequestContextMiddleware)
+
 app.include_router(routes_auth.router)
 app.include_router(routes_jwks.router)
 

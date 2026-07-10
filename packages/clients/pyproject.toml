@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rcp-clients"
+version = "0.1.0"
+description = "Typed HTTP clients for calling RCP services (IAM, Logistics, Analytics)."
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27",
+]
+
+[tool.setuptools.packages.find]
+include = ["rcp_clients*"]

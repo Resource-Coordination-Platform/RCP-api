@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 
@@ -17,31 +18,36 @@ import (
 )
 
 func main() {
+	// structured JSON logging, matching the Python services
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)).With("service", "rto-service"))
+
 	cfg := config.Load()
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
-    
+
 	//Database connection
 	st, err := store.New(ctx, cfg.DatabaseURL)
 	if err != nil {
-		log.Fatalf("database: %v", err)
+		slog.Error("database", "err", err)
+		os.Exit(1)
 	}
 	if err := st.EnsureSchema(ctx); err != nil {
-		log.Fatalf("schema: %v", err)
+		slog.Error("schema", "err", err)
+		os.Exit(1)
 	}
 
 	//JWT Authentication/IAM
 	verifier := auth.NewVerifier(cfg.JWKSURL, cfg.JWTIssuer, cfg.JWTAudience)
 	if err := verifier.Warm(); err != nil {
 		// non-fatal: IAM may still be booting; the cache refreshes on demand
-		log.Printf("jwks warm-up failed (will retry on demand): %v", err)
+		slog.Warn("jwks warm-up failed (will retry on demand)", "err", err)
 	}
-    
+
 	//Real time engine (websocker and rabbitMQ activation)
 	hub := ws.NewHub()
 
 	go consumer.New(cfg, st, hub, verifier, push.LogSender{}).Run(ctx)
-	
+
 	//HTTP Api (Routing)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", ws.Handler(hub, verifier, st))
@@ -57,8 +63,9 @@ func main() {
 		server.Shutdown(context.Background())
 	}()
 
-	log.Printf("rto listening on %s", cfg.ListenAddr)
+	slog.Info("rto listening", "addr", cfg.ListenAddr)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("server: %v", err)
+		slog.Error("server", "err", err)
+		os.Exit(1)
 	}
 }

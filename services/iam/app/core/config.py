@@ -1,11 +1,8 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from rcp_common.config import BaseServiceSettings
 
 
-class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-
+class Settings(BaseServiceSettings):
     SERVICE_NAME: str = "iam-service"
-    ENVIRONMENT: str = "local"
 
     DATABASE_URL: str = "postgresql+psycopg2://svc_iam:iam_local_pw@localhost:5432/rcp"
     RABBITMQ_URL: str = "amqp://rcp:rcp_local_pw@localhost:5672/rcp"

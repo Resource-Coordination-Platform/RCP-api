@@ -3,7 +3,7 @@ package ws
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
@@ -109,7 +109,7 @@ func (c *Client) handleSync(frame inboundFrame) {
 
 	events, err := c.store.SyncSince(ctx, c.TenantID, frame.Cursor, syncBatchLimit)
 	if err != nil {
-		log.Printf("sync query failed: %v", err)
+		slog.Error("sync query failed", "err", err)
 		return
 	}
 	cursor := frame.Cursor
@@ -133,7 +133,7 @@ func (c *Client) handleSync(frame inboundFrame) {
 
 	if frame.DeviceID != "" {
 		if err := c.store.UpsertDeviceCursor(ctx, c.TenantID, c.UserID, frame.DeviceID, cursor); err != nil {
-			log.Printf("cursor upsert failed: %v", err)
+			slog.Error("cursor upsert failed", "err", err)
 		}
 	}
 }
@@ -146,7 +146,7 @@ func (c *Client) handleAck(frame inboundFrame) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := c.store.MarkNotificationRead(ctx, c.TenantID, c.UserID, id); err != nil {
-		log.Printf("ack failed: %v", err)
+		slog.Error("ack failed", "err", err)
 	}
 }
 

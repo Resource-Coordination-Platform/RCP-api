@@ -1,17 +1,18 @@
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from rcp_common.logging import configure_logging
+from rcp_common.middleware import RequestContextMiddleware
 
-from app.api import routes_inventory, routes_reports, routes_requests, routes_volunteers
+from app.api import routes_inventory, routes_requests, routes_volunteers
 from app.core.config import settings
 from app.db.database import engine
 from app.events.consumers.iam import start_consumer
 from app.events.relay import start_relay
 from app.models import Base
 
-logging.basicConfig(level=logging.INFO)
+configure_logging(settings.SERVICE_NAME, settings.LOG_LEVEL)
 
 
 @asynccontextmanager
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="RCP Logistics Service", lifespan=lifespan)
 
+app.add_middleware(RequestContextMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -38,7 +40,6 @@ app.add_middleware(
 app.include_router(routes_requests.router)
 app.include_router(routes_inventory.router)
 app.include_router(routes_volunteers.router)
-app.include_router(routes_reports.router)
 
 
 @app.get("/health")

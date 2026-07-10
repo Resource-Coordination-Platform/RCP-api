@@ -1,0 +1,36 @@
+name: ci-gateway
+
+on:
+  pull_request:
+    paths:
+      - "gateway/**"
+      - "packages/common/**"
+      - "packages/clients/**"
+  push:
+    branches: [main]
+    paths:
+      - "gateway/**"
+      - "packages/common/**"
+      - "packages/clients/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gateway
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt ../packages/common ../packages/clients
+      - run: python -m pytest tests -q
+
+  build:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f gateway/Dockerfile -t rcp/gateway:${{ github.sha }} .

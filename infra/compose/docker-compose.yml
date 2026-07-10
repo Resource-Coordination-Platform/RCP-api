@@ -46,8 +46,26 @@ services:
     # the services on startup; rabbitmq/definitions.json is the same
     # topology for importing into a managed cluster in production.
 
+  gateway:
+    build:
+      context: ../..
+      dockerfile: gateway/Dockerfile
+    environment:
+      ENVIRONMENT: local
+      IAM_URL: http://iam:8000
+      LOGISTICS_URL: http://logistics:8000
+      ANALYTICS_URL: http://analytics:8000
+      RTO_URL: http://rto:8080
+    ports: ["8000:8000"]
+    depends_on:
+      iam: { condition: service_started }
+      logistics: { condition: service_started }
+      analytics: { condition: service_started }
+
   iam:
-    build: ../../services/iam
+    build:
+      context: ../..
+      dockerfile: services/iam/Dockerfile
     environment:
       <<: *common-env
       DATABASE_URL: postgresql+psycopg2://svc_iam:iam_local_pw@db:5432/rcp
@@ -59,7 +77,9 @@ services:
     secrets: [jwt_signing_key]
 
   logistics:
-    build: ../../services/logistics
+    build:
+      context: ../..
+      dockerfile: services/logistics/Dockerfile
     environment:
       <<: *common-env
       DATABASE_URL: postgresql+psycopg2://svc_logistics:logistics_local_pw@db:5432/rcp
@@ -68,6 +88,20 @@ services:
       db: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
       iam: { condition: service_started }
+
+  analytics:
+    build:
+      context: ../..
+      dockerfile: services/analytics/Dockerfile
+    environment:
+      <<: *common-env
+      DATABASE_URL: postgresql+psycopg2://svc_analytics:analytics_local_pw@db:5432/rcp
+    ports: ["8003:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      iam: { condition: service_started }
+      logistics: { condition: service_started }
 
   rto:
     build: ../../services/rto

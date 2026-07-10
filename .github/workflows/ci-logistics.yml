@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - "services/logistics/**"
+      - "packages/common/**"
       - "packages/contracts/**"
   push:
     branches: [main]
     paths:
       - "services/logistics/**"
+      - "packages/common/**"
       - "packages/contracts/**"
 
 jobs:
@@ -22,7 +24,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt ../../packages/common
       - run: python -m pytest tests -q
       - name: Verify ORM mappings configure
         run: |
@@ -34,4 +36,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: docker build -t rcp/logistics:${{ github.sha }} services/logistics
+      - run: docker build -f services/logistics/Dockerfile -t rcp/logistics:${{ github.sha }} .
