@@ -10,6 +10,8 @@ class Settings(BaseServiceSettings):
         "postgresql+psycopg2://svc_analytics:analytics_local_pw@localhost:5432/rcp"
     )
     RABBITMQ_URL: str = "amqp://rcp:rcp_local_pw@localhost:5672/rcp"
+    EVENTS_EXCHANGE: str = "rcp.events"
+    DLX_EXCHANGE: str = "rcp.dlx"
 
     # JWT verification (issued by IAM; verified locally via cached JWKS)
     JWT_JWKS_URL: str = "http://localhost:8001/.well-known/jwks.json"
