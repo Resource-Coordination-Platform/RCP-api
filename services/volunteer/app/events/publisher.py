@@ -1,5 +1,5 @@
-"""Outbox writer: call emit() inside the same Session/transaction as the
-state change. The relay worker (relay.py) does the actual AMQP publish."""
+"""Outbox writer — see services/iam/app/events/publisher.py for the pattern.
+(Kept per-service until packages/py-shared is published as a wheel.)"""
 
 import uuid
 from datetime import datetime, timezone

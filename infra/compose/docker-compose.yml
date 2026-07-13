@@ -55,12 +55,14 @@ services:
       IAM_URL: http://iam:8000
       LOGISTICS_URL: http://logistics:8000
       ANALYTICS_URL: http://analytics:8000
+      VOLUNTEER_URL: http://volunteer:8000
       RTO_URL: http://rto:8080
     ports: ["8000:8000"]
     depends_on:
       iam: { condition: service_started }
       logistics: { condition: service_started }
       analytics: { condition: service_started }
+      volunteer: { condition: service_started }
 
   iam:
     build:
@@ -102,6 +104,19 @@ services:
       rabbitmq: { condition: service_healthy }
       iam: { condition: service_started }
       logistics: { condition: service_started }
+
+  volunteer:
+    build:
+      context: ../..
+      dockerfile: services/volunteer/Dockerfile
+    environment:
+      <<: *common-env
+      DATABASE_URL: postgresql+psycopg2://svc_volunteer:volunteer_local_pw@db:5432/rcp
+    ports: ["8004:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      iam: { condition: service_started }
 
   rto:
     build: ../../services/rto

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/volunteer/assignment-notified.v1.schema.json",
+  "title": "volunteer.assignment.notified v1 (data payload)",
+  "description": "The simulated push notification: one per matched volunteer. A notification service (or the RTO websocket hub) fans this out to the device.",
+  "type": "object",
+  "required": ["event_id", "requirement_id", "volunteer_user_id", "skill", "source_district"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "requirement_id": { "type": "string", "format": "uuid" },
+    "volunteer_user_id": { "type": "string", "format": "uuid", "description": "schema_iam.users id of the volunteer" },
+    "skill": { "type": "string" },
+    "source_district": { "type": "string" },
+    "title": { "type": "string" }
+  }
+}

@@ -20,14 +20,29 @@ from jose import JWTError, jwt
 
 from rcp_common.exceptions import AuthError
 
-__all__ = ["AuthError", "JWKSVerifier", "Principal", "PrincipalDependency", "require_any_role"]
+__all__ = [
+    "AuthError",
+    "JWKSVerifier",
+    "Principal",
+    "PrincipalDependency",
+    "require_any_role",
+    "require_tenant_role",
+]
 
 
 @dataclass(frozen=True)
 class Principal:
     user_id: uuid.UUID
-    tenant_id: uuid.UUID
+    # None == global (mobile app) actor: VOLUNTEER / VICTIM / DONATOR.
+    # Services must treat the absence of a tenant as "no tenant scope",
+    # never as "all tenants".
+    tenant_id: uuid.UUID | None
+    user_type: str | None
     roles: tuple[str, ...]
+
+    @property
+    def is_global(self) -> bool:
+        return self.tenant_id is None
 
 
 class _JWKSCache:
@@ -80,9 +95,11 @@ class JWKSVerifier:
                 issuer=self._issuer,
                 audience=self._audience,
             )
+            raw_tenant = claims.get("tenant_id")
             return Principal(
                 user_id=uuid.UUID(claims["sub"]),
-                tenant_id=uuid.UUID(claims["tenant_id"]),
+                tenant_id=uuid.UUID(raw_tenant) if raw_tenant else None,
+                user_type=claims.get("user_type"),
                 roles=tuple(claims.get("roles", [])),
             )
         except (JWTError, KeyError, ValueError, httpx.HTTPError) as exc:
@@ -120,6 +137,20 @@ class PrincipalDependency:
 
 def require_any_role(principal_dependency: PrincipalDependency, *roles: str):
     def checker(principal: Principal = Depends(principal_dependency)) -> Principal:
+        if not set(roles) & set(principal.roles):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Insufficient permissions")
+        return principal
+
+    return checker
+
+
+def require_tenant_role(principal_dependency: PrincipalDependency, *roles: str):
+    """Like require_any_role, but additionally rejects global (tenant-less)
+    principals — for endpoints whose data is tenant-scoped."""
+
+    def checker(principal: Principal = Depends(principal_dependency)) -> Principal:
+        if principal.tenant_id is None:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Tenant-scoped endpoint")
         if not set(roles) & set(principal.roles):
             raise HTTPException(status.HTTP_403_FORBIDDEN, "Insufficient permissions")
         return principal

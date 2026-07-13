@@ -3,14 +3,15 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.models import Tenant, User
+from app.models import GLOBAL_USER_TYPES, Tenant, User, UserType
 from app.schemas.auth_schema import (
+    GlobalUserRegister,
     LoginRequest,
     RefreshRequest,
     TenantOnboard,
     TenantRead,
+    TenantUserRegister,
     TokenPair,
-    UserRegister,
     UserRead,
 )
 from app.services import auth as auth_service
@@ -25,12 +26,36 @@ def onboard_tenant(data: TenantOnboard, db: Session = Depends(get_db)):
     return auth_service.onboard_tenant(db, data)
 
 
+@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+def register_global(data: GlobalUserRegister, db: Session = Depends(get_db)):
+    """Mobile-app signup (global pool: VOLUNTEER / VICTIM / DONATOR)."""
+    if data.user_type not in GLOBAL_USER_TYPES:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Mobile registration accepts VOLUNTEER, VICTIM or DONATOR only",
+        )
+    if db.scalars(
+        select(User).where(User.tenant_id.is_(None), User.email == data.email)
+    ).first():
+        raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
+    return auth_service.register_global_user(db, data)
+
+
 @router.post(
     "/tenants/{tenant_slug}/register",
     response_model=UserRead,
     status_code=status.HTTP_201_CREATED,
 )
-def register(tenant_slug: str, data: UserRegister, db: Session = Depends(get_db)):
+def register_tenant_user(
+    tenant_slug: str, data: TenantUserRegister, db: Session = Depends(get_db)
+):
+    """Web-portal signup under a tenant. Self-registration is COORDINATOR
+    only; TENANT_ADMIN exists solely through tenant onboarding."""
+    if data.user_type != UserType.COORDINATOR:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Tenant registration accepts COORDINATOR only",
+        )
     tenant = db.scalars(select(Tenant).where(Tenant.slug == tenant_slug)).first()
     if tenant is None or tenant.status != "active":
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Tenant not found")
@@ -38,11 +63,15 @@ def register(tenant_slug: str, data: UserRegister, db: Session = Depends(get_db)
         select(User).where(User.tenant_id == tenant.id, User.email == data.email)
     ).first():
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
-    return auth_service.register_user(db, tenant, data)
+    return auth_service.register_tenant_user(db, tenant, data)
 
 
 @router.post("/login", response_model=TokenPair)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
+    """One endpoint, two populations: requests carrying tenant_slug resolve
+    against that tenant's users; requests without it resolve against the
+    global pool. A portal user can never log in through the mobile path
+    (and vice versa) because the lookups are disjoint by tenant_id."""
     pair = auth_service.login(db, data)
     if pair is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")

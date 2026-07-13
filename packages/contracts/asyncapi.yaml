@@ -52,6 +52,32 @@ channels:
     address: rto.delivery.acknowledged
   rto.device.registered:
     address: rto.device.registered
+  volunteer.disaster.declared:
+    address: volunteer.disaster.declared
+    messages:
+      disasterDeclared:
+        payload:
+          $ref: "./events/volunteer/disaster-declared.v1.schema.json"
+  volunteer.assignment.notified:
+    address: volunteer.assignment.notified
+    messages:
+      assignmentNotified:
+        payload:
+          $ref: "./events/volunteer/assignment-notified.v1.schema.json"
+  volunteer.assignment.declined:
+    address: volunteer.assignment.declined
+  volunteer.assignment.en-route:
+    address: volunteer.assignment.en-route
+  volunteer.assignment.completed:
+    address: volunteer.assignment.completed
+  volunteer.requirement.fulfilled:
+    address: volunteer.requirement.fulfilled
+  volunteer.team.formed:
+    address: volunteer.team.formed
+    messages:
+      teamFormed:
+        payload:
+          $ref: "./events/volunteer/team-formed.v1.schema.json"
 
 operations:
   logisticsConsumesIamEvents:
@@ -64,3 +90,13 @@ operations:
     summary: "Queue rto.domain-events.q <- logistics.#, iam.user.deactivated, iam.token.revoked"
     channel:
       $ref: "#/channels/logistics.task.assigned"
+  volunteerConsumesIamEvents:
+    action: receive
+    summary: "Queue volunteer.iam-events.q <- iam.user.* (global VOLUNTEER replication)"
+    channel:
+      $ref: "#/channels/iam.user.registered"
+  volunteerConsumesDisasterDeclarations:
+    action: receive
+    summary: "Queue volunteer.disaster-events.q <- volunteer.disaster.declared (async matching fan-out)"
+    channel:
+      $ref: "#/channels/volunteer.disaster.declared"

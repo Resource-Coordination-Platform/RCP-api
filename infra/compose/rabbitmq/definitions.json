@@ -75,6 +75,40 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {}
+    },
+    {
+      "name": "volunteer.iam-events.q",
+      "vhost": "rcp",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "rcp.dlx"
+      }
+    },
+    {
+      "name": "volunteer.disaster-events.q",
+      "vhost": "rcp",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "rcp.dlx"
+      }
+    },
+    {
+      "name": "dlq.volunteer.iam-events",
+      "vhost": "rcp",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "dlq.volunteer.disaster-events",
+      "vhost": "rcp",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
     }
   ],
   "bindings": [
@@ -132,6 +166,38 @@
       "destination": "dlq.rto.domain-events",
       "destination_type": "queue",
       "routing_key": "#",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.events",
+      "vhost": "rcp",
+      "destination": "volunteer.iam-events.q",
+      "destination_type": "queue",
+      "routing_key": "iam.user.*",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.events",
+      "vhost": "rcp",
+      "destination": "volunteer.disaster-events.q",
+      "destination_type": "queue",
+      "routing_key": "volunteer.disaster.declared",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.dlx",
+      "vhost": "rcp",
+      "destination": "dlq.volunteer.iam-events",
+      "destination_type": "queue",
+      "routing_key": "iam.#",
+      "arguments": {}
+    },
+    {
+      "source": "rcp.dlx",
+      "vhost": "rcp",
+      "destination": "dlq.volunteer.disaster-events",
+      "destination_type": "queue",
+      "routing_key": "volunteer.#",
       "arguments": {}
     }
   ]

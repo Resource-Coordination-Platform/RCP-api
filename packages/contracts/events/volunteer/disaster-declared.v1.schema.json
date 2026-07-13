@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/volunteer/disaster-declared.v1.schema.json",
+  "title": "volunteer.disaster.declared v1 (data payload)",
+  "type": "object",
+  "required": ["event_id", "tenant_id", "title", "source_district", "broadcast_type", "resolved_districts", "requirements"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "tenant_id": { "type": "string", "format": "uuid" },
+    "title": { "type": "string" },
+    "source_district": { "type": "string" },
+    "broadcast_type": { "type": "string", "enum": ["RADIUS_L1", "RADIUS_L2", "TARGETED"] },
+    "resolved_districts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "The concrete district list after adjacency/targeting resolution"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["skill", "required_count"],
+        "properties": {
+          "skill": { "type": "string" },
+          "required_count": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "occurred_at": { "type": "string", "format": "date-time" }
+  }
+}

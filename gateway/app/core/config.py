@@ -7,6 +7,7 @@ class Settings(BaseServiceSettings):
     IAM_URL: str = "http://localhost:8001"
     LOGISTICS_URL: str = "http://localhost:8002"
     ANALYTICS_URL: str = "http://localhost:8003"
+    VOLUNTEER_URL: str = "http://localhost:8004"
     # WebSocket clients connect to RTO directly (ws:// upgrade is not proxied here)
     RTO_URL: str = "http://localhost:8080"
 
@@ -31,4 +32,7 @@ ROUTE_TABLE: dict[str, str] = {
     "/api/inventory": settings.LOGISTICS_URL,
     "/api/volunteers": settings.LOGISTICS_URL,
     "/api/reports": settings.ANALYTICS_URL,
+    # volunteer-service (longest prefix wins, so /api/volunteers above
+    # still routes to logistics' legacy operational profiles)
+    "/api/volunteer": settings.VOLUNTEER_URL,
 }

@@ -3,9 +3,11 @@
   "$id": "https://contracts.rcp/events/iam/user-registered.v1.schema.json",
   "title": "iam.user.registered v1 (data payload)",
   "type": "object",
-  "required": ["user_id", "email", "full_name", "roles", "is_active", "updated_at"],
+  "required": ["user_id", "user_type", "email", "full_name", "roles", "is_active", "updated_at"],
   "properties": {
     "user_id": { "type": "string", "format": "uuid" },
+    "tenant_id": { "type": ["string", "null"], "format": "uuid", "description": "null == global (mobile app) user" },
+    "user_type": { "type": "string", "enum": ["VOLUNTEER", "VICTIM", "DONATOR", "TENANT_ADMIN", "COORDINATOR"] },
     "email": { "type": "string", "format": "email" },
     "full_name": { "type": "string" },
     "phone": { "type": ["string", "null"] },

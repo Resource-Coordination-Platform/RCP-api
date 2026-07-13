@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/volunteer/team-formed.v1.schema.json",
+  "title": "volunteer.team.formed v1 (data payload)",
+  "description": "Emitted exactly once per disaster event, when the last open skill quota fills.",
+  "type": "object",
+  "required": ["event_id", "title", "source_district", "team"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "title": { "type": "string" },
+    "source_district": { "type": "string" },
+    "team": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["volunteer_user_id", "full_name", "skill"],
+        "properties": {
+          "volunteer_user_id": { "type": "string", "format": "uuid" },
+          "full_name": { "type": "string" },
+          "phone": { "type": ["string", "null"] },
+          "skill": { "type": "string" },
+          "base_district": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

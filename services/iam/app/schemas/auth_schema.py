@@ -3,6 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from app.models.user import UserType
+
 
 class TenantOnboard(BaseModel):
     """Creates a tenant plus its first tenant_admin user in one step."""
@@ -25,20 +27,37 @@ class TenantRead(BaseModel):
     created_at: datetime
 
 
-class UserRegister(BaseModel):
+class GlobalUserRegister(BaseModel):
+    """Mobile-app signup: the global (tenant-less) actor pool."""
+
     email: EmailStr
     password: str = Field(min_length=10)
     full_name: str
     phone: str | None = None
-    # public signup may only request these two
-    role: str = Field(default="member", pattern="^(member|volunteer)$")
+    user_type: UserType = Field(
+        description="Mobile actors only: VOLUNTEER, VICTIM or DONATOR"
+    )
+
+
+class TenantUserRegister(BaseModel):
+    """Web-portal signup under a tenant. TENANT_ADMIN is only ever created
+    through tenant onboarding, so self-registration is COORDINATOR-only."""
+
+    email: EmailStr
+    password: str = Field(min_length=10)
+    full_name: str
+    phone: str | None = None
+    user_type: UserType = Field(
+        default=UserType.COORDINATOR, description="Portal actors: COORDINATOR"
+    )
 
 
 class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    tenant_id: uuid.UUID
+    tenant_id: uuid.UUID | None  # None == global (mobile app) user
+    user_type: UserType
     email: EmailStr
     full_name: str
     phone: str | None
@@ -48,7 +67,10 @@ class UserRead(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    tenant_slug: str
+    """tenant_slug present == web-portal login (tenant-bound users);
+    absent == mobile-app login (global pool)."""
+
+    tenant_slug: str | None = None
     email: EmailStr
     password: str
 

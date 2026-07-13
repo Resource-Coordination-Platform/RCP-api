@@ -9,8 +9,8 @@
     "event_type": { "type": "string", "pattern": "^[a-z]+\\.[a-z-]+\\.[a-z-]+$", "description": "<producer>.<entity>.<action>, mirrors the routing key" },
     "schema_version": { "type": "integer", "minimum": 1 },
     "occurred_at": { "type": "string", "format": "date-time" },
-    "tenant_id": { "type": "string", "format": "uuid" },
-    "producer": { "type": "string", "enum": ["iam-service", "logistics-service", "rto-service"] },
+    "tenant_id": { "type": ["string", "null"], "format": "uuid", "description": "null == event about a global (tenant-less) actor" },
+    "producer": { "type": "string", "enum": ["iam-service", "logistics-service", "rto-service", "volunteer-service"] },
     "trace_id": { "type": "string", "description": "W3C traceparent" },
     "data": { "type": "object" }
   },

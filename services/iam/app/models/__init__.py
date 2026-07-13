@@ -3,6 +3,17 @@ from app.models.outbox import Outbox
 from app.models.refresh_token import RefreshToken
 from app.models.signing_key import SigningKey
 from app.models.tenant import Tenant
-from app.models.user import RoleAssignment, User
+from app.models.user import GLOBAL_USER_TYPES, TENANT_USER_TYPES, RoleAssignment, User, UserType
 
-__all__ = ["Base", "Tenant", "User", "RoleAssignment", "RefreshToken", "SigningKey", "Outbox"]
+__all__ = [
+    "Base",
+    "Tenant",
+    "User",
+    "UserType",
+    "GLOBAL_USER_TYPES",
+    "TENANT_USER_TYPES",
+    "RoleAssignment",
+    "RefreshToken",
+    "SigningKey",
+    "Outbox",
+]

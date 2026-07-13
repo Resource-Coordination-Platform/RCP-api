@@ -1,4 +1,11 @@
-"""Auth domain logic: onboarding, registration, login, refresh rotation."""
+"""Auth domain logic: onboarding, registration, login, refresh rotation.
+
+Two registration paths share one identity store:
+- register_global_user: mobile actors (VOLUNTEER/VICTIM/DONATOR), no tenant
+- register_tenant_user: portal actors (COORDINATOR; TENANT_ADMIN only via
+  tenant onboarding), always tenant-bound
+The DB CHECK constraint (ck_users_type_tenancy) backstops both paths.
+"""
 
 from datetime import datetime, timedelta, timezone
 
@@ -14,13 +21,29 @@ from app.core.security import (
     verify_password,
 )
 from app.events.publisher import emit
-from app.models import RefreshToken, RoleAssignment, Tenant, User
-from app.schemas.auth_schema import LoginRequest, TenantOnboard, TokenPair, UserRegister
+from app.models import (
+    GLOBAL_USER_TYPES,
+    TENANT_USER_TYPES,
+    RefreshToken,
+    RoleAssignment,
+    Tenant,
+    User,
+    UserType,
+)
+from app.schemas.auth_schema import (
+    GlobalUserRegister,
+    LoginRequest,
+    TenantOnboard,
+    TenantUserRegister,
+    TokenPair,
+)
 
 
 def _user_registered_payload(user: User) -> dict:
     return {
         "user_id": str(user.id),
+        "tenant_id": str(user.tenant_id) if user.tenant_id else None,
+        "user_type": user.user_type.value,
         "email": user.email,
         "full_name": user.full_name,
         "phone": user.phone,
@@ -37,13 +60,12 @@ def onboard_tenant(db: Session, data: TenantOnboard) -> Tenant:
 
     admin = User(
         tenant_id=tenant.id,
+        user_type=UserType.TENANT_ADMIN,
         email=data.admin_email,
         password_hash=hash_password(data.admin_password),
         full_name=data.admin_full_name,
     )
     db.add(admin)
-    db.flush()
-    db.add(RoleAssignment(tenant_id=tenant.id, user_id=admin.id, role="tenant_admin"))
     db.flush()
     db.refresh(admin)
 
@@ -56,17 +78,19 @@ def onboard_tenant(db: Session, data: TenantOnboard) -> Tenant:
     return tenant
 
 
-def register_user(db: Session, tenant: Tenant, data: UserRegister) -> User:
+def register_tenant_user(db: Session, tenant: Tenant, data: TenantUserRegister) -> User:
+    """Web-portal path: user is bound to the tenant for its whole lifetime."""
+    if data.user_type not in TENANT_USER_TYPES:
+        raise ValueError(f"{data.user_type} cannot be registered under a tenant")
     user = User(
         tenant_id=tenant.id,
+        user_type=data.user_type,
         email=data.email,
         password_hash=hash_password(data.password),
         full_name=data.full_name,
         phone=data.phone,
     )
     db.add(user)
-    db.flush()
-    db.add(RoleAssignment(tenant_id=tenant.id, user_id=user.id, role=data.role))
     db.flush()
     db.refresh(user)
 
@@ -77,9 +101,35 @@ def register_user(db: Session, tenant: Tenant, data: UserRegister) -> User:
     return user
 
 
+def register_global_user(db: Session, data: GlobalUserRegister) -> User:
+    """Mobile-app path: identity in the global pool, tenant_id stays NULL."""
+    if data.user_type not in GLOBAL_USER_TYPES:
+        raise ValueError(f"{data.user_type} must be registered under a tenant")
+    user = User(
+        tenant_id=None,
+        user_type=data.user_type,
+        email=data.email,
+        password_hash=hash_password(data.password),
+        full_name=data.full_name,
+        phone=data.phone,
+    )
+    db.add(user)
+    db.flush()
+    db.refresh(user)
+
+    emit(db, routing_key="iam.user.registered", tenant_id=None,
+         data=_user_registered_payload(user))
+    db.commit()
+    db.refresh(user)
+    return user
+
+
 def _issue_pair(db: Session, user: User, rotated_from=None) -> TokenPair:
     access = create_access_token(
-        user_id=str(user.id), tenant_id=str(user.tenant_id), roles=user.roles
+        user_id=str(user.id),
+        user_type=user.user_type.value,
+        roles=user.roles,
+        tenant_id=str(user.tenant_id) if user.tenant_id else None,
     )
     raw_refresh, refresh_hash = new_refresh_token()
     db.add(
@@ -99,12 +149,20 @@ def _issue_pair(db: Session, user: User, rotated_from=None) -> TokenPair:
 
 
 def login(db: Session, data: LoginRequest) -> TokenPair | None:
-    tenant = db.scalars(select(Tenant).where(Tenant.slug == data.tenant_slug)).first()
-    if tenant is None or tenant.status != "active":
-        return None
+    """Portal login carries a tenant_slug; mobile login does not. The two
+    populations are disjoint (partial unique indexes), so each lookup is
+    unambiguous."""
+    if data.tenant_slug is not None:
+        tenant = db.scalars(select(Tenant).where(Tenant.slug == data.tenant_slug)).first()
+        if tenant is None or tenant.status != "active":
+            return None
+        user_filter = User.tenant_id == tenant.id
+    else:
+        user_filter = User.tenant_id.is_(None)
+
     user = db.scalars(
         select(User)
-        .where(User.tenant_id == tenant.id, User.email == data.email)
+        .where(user_filter, User.email == data.email)
         .options(selectinload(User.role_assignments))
     ).first()
     if user is None or not user.is_active:
