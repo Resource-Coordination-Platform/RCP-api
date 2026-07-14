@@ -1,0 +1,20 @@
+{
+  "event_id": "4c7a6f5e-8d0b-4c2e-9f4a-5b6c7d8e9f0a",
+  "event_type": "logistics.request.status-changed",
+  "schema_version": 1,
+  "occurred_at": "2026-07-14T11:00:00+00:00",
+  "tenant_id": "9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d",
+  "producer": "logistics-service",
+  "trace_id": null,
+  "data": {
+    "request_id": "4b5c6d7e-8f9a-4b0c-9d1e-2f3a4b5c6d7e",
+    "category_id": "5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f",
+    "quantity_needed": 40,
+    "status": "verified",
+    "old_status": "pending",
+    "new_status": "verified",
+    "requester_user_id": "7c1e9a2b-4f6d-4e8a-b1c2-d3e4f5a6b7c8",
+    "changed_by_user_id": "8d2f0b3c-5a7e-4f9b-8c1d-2e3f4a5b6c7d",
+    "updated_at": "2026-07-14T11:00:00+00:00"
+  }
+}

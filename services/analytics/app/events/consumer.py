@@ -13,8 +13,6 @@ import time
 import uuid
 from datetime import datetime
 
-from sqlalchemy import select
-
 from app.core.config import settings
 from app.db.database import SessionLocal
 from app.models import CategoryProjection, InventoryProjection, ProcessedEvent, RequestProjection
@@ -29,13 +27,20 @@ BINDINGS = [
 RECONNECT_SLEEP_S = 2.0
 
 
-def _already_processed(event_id: uuid.UUID) -> bool:
-    with SessionLocal() as db:
-        return db.get(ProcessedEvent, event_id) is not None
+def _is_stale(row_updated_at, incoming_updated_at) -> bool:
+    """Out-of-order guard: never let an older event overwrite a newer
+    projection. Events without a timestamp are applied unconditionally."""
+    return (
+        row_updated_at is not None
+        and incoming_updated_at is not None
+        and incoming_updated_at < row_updated_at
+    )
 
 
 def _upsert_category(db, data: dict, tenant_id: uuid.UUID) -> None:
     row = db.get(CategoryProjection, uuid.UUID(data["category_id"]))
+    if row is not None and _is_stale(row.updated_at, _parse_dt(data.get("updated_at"))):
+        return
     if row is None:
         db.add(
             CategoryProjection(
@@ -59,6 +64,8 @@ def _upsert_category(db, data: dict, tenant_id: uuid.UUID) -> None:
 def _upsert_inventory(db, data: dict, tenant_id: uuid.UUID) -> None:
     item_id = uuid.UUID(data["item_id"])
     row = db.get(InventoryProjection, item_id)
+    if row is not None and _is_stale(row.updated_at, _parse_dt(data.get("updated_at"))):
+        return
     payload = dict(
         item_id=item_id,
         tenant_id=tenant_id,
@@ -80,6 +87,8 @@ def _upsert_inventory(db, data: dict, tenant_id: uuid.UUID) -> None:
 def _upsert_request(db, data: dict, tenant_id: uuid.UUID) -> None:
     request_id = uuid.UUID(data["request_id"])
     row = db.get(RequestProjection, request_id)
+    if row is not None and _is_stale(row.updated_at, _parse_dt(data.get("updated_at"))):
+        return
     payload = dict(
         request_id=request_id,
         tenant_id=tenant_id,

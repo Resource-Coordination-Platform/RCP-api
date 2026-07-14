@@ -54,14 +54,20 @@ def _upsert_profile(db: Session, data: dict) -> None:
                 phone=data.get("phone"),
                 is_active=data.get("is_active", True),
                 available_status=False,  # opts in from the app once ready
+                source_updated_at=source_updated_at,
             )
         )
-    elif profile.updated_at is None or profile.updated_at <= source_updated_at:
-        # only the replicated identity fields; never touch the
-        # service-owned operational fields
+    elif profile.source_updated_at is None or profile.source_updated_at <= source_updated_at:
+        # Guarded by the *source* (IAM) timestamp, never the local
+        # updated_at — that clock moves on every local profile edit and
+        # would make legitimate identity updates look stale.
+        # Only the replicated identity fields; never touch the
+        # service-owned operational fields.
         profile.full_name = data["full_name"]
         profile.phone = data.get("phone")
         profile.is_active = data.get("is_active", True)
+        profile.source_updated_at = source_updated_at
+    # else: stale out-of-order event — ignore
 
 
 def _deactivate_profile(db: Session, data: dict) -> None:

@@ -1,0 +1,19 @@
+{
+  "event_id": "5d8b7a6f-9e1c-4d3f-8a5b-6c7d8e9f0a1b",
+  "event_type": "logistics.inventory.item-updated",
+  "schema_version": 1,
+  "occurred_at": "2026-07-14T12:00:00+00:00",
+  "tenant_id": "9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d",
+  "producer": "logistics-service",
+  "trace_id": null,
+  "data": {
+    "item_id": "6e9c8b7a-0f2d-4e4a-9b6c-7d8e9f0a1b2c",
+    "category_id": "5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f",
+    "name": "Bottled water 1L",
+    "quantity_total": 500,
+    "quantity_reserved": 120,
+    "quantity_available": 380,
+    "status": "available",
+    "updated_at": "2026-07-14T12:00:00+00:00"
+  }
+}

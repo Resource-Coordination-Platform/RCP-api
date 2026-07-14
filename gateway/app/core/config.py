@@ -8,13 +8,19 @@ class Settings(BaseServiceSettings):
     LOGISTICS_URL: str = "http://localhost:8002"
     ANALYTICS_URL: str = "http://localhost:8003"
     VOLUNTEER_URL: str = "http://localhost:8004"
-    # WebSocket clients connect to RTO directly (ws:// upgrade is not proxied here)
+    # WebSocket clients connect through the gateway's /ws endpoint, which
+    # proxies the upgrade to RTO (see app/ws_proxy.py); RTO still verifies
+    # the bearer subprotocol itself.
     RTO_URL: str = "http://localhost:8080"
 
-    # simple in-memory token bucket, per client IP
+    # token bucket per client (Redis-backed when REDIS_URL is set)
     RATE_LIMIT_RPS: float = 20.0
     RATE_LIMIT_BURST: int = 60
     REDIS_URL: str = ""
+    # When the gateway sits behind a load balancer / edge proxy, every
+    # connection carries the LB's IP — set this to true so the limiter keys
+    # on the client address the trusted hop wrote into X-Forwarded-For.
+    RATE_LIMIT_TRUST_FORWARDED: bool = False
 
     PROXY_TIMEOUT_SECONDS: float = 30.0
 

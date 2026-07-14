@@ -14,7 +14,8 @@ from app.core.config import settings
 def _upstream_ws_url() -> str:
     parsed = urllib.parse.urlsplit(settings.RTO_URL)
     scheme = "wss" if parsed.scheme == "https" else "ws"
-    return urllib.parse.urlunsplit((scheme, parsed.hostname or "localhost", "/ws", "", ""))
+    # netloc keeps the port (hostname alone would silently drop :8080)
+    return urllib.parse.urlunsplit((scheme, parsed.netloc or "localhost", "/ws", "", ""))
 
 
 async def proxy_ws(websocket: WebSocket) -> None:

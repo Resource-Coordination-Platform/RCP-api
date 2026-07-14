@@ -1,0 +1,18 @@
+{
+  "event_id": "1e8d3c2b-5a7e-4f9b-8c1d-2e3f4a5b6c7d",
+  "event_type": "iam.user.updated",
+  "schema_version": 1,
+  "occurred_at": "2026-07-14T09:00:00+00:00",
+  "tenant_id": "9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d",
+  "producer": "iam-service",
+  "trace_id": null,
+  "data": {
+    "user_id": "7c1e9a2b-4f6d-4e8a-b1c2-d3e4f5a6b7c8",
+    "email": "kamala@example.lk",
+    "full_name": "Kamala Silva",
+    "phone": null,
+    "roles": ["COORDINATOR"],
+    "is_active": true,
+    "updated_at": "2026-07-14T09:00:00+00:00"
+  }
+}

@@ -11,7 +11,7 @@
     "occurred_at": { "type": "string", "format": "date-time" },
     "tenant_id": { "type": ["string", "null"], "format": "uuid", "description": "null == event about a global (tenant-less) actor" },
     "producer": { "type": "string", "enum": ["iam-service", "logistics-service", "rto-service", "volunteer-service"] },
-    "trace_id": { "type": "string", "description": "W3C traceparent" },
+    "trace_id": { "type": ["string", "null"], "description": "W3C traceparent; null when the change did not originate from a traced request" },
     "data": { "type": "object" }
   },
   "additionalProperties": false

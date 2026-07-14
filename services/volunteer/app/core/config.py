@@ -15,7 +15,9 @@ class Settings(BaseServiceSettings):
     JWT_AUDIENCE: str = "rcp-services"
     JWKS_CACHE_TTL_SECONDS: int = 600
 
-    AUTO_CREATE_TABLES: bool = True
+    # Alembic migrations are the source of truth for the schema; create_all
+    # on boot is opt-in for local runs only (docker-compose sets it).
+    AUTO_CREATE_TABLES: bool = False
 
     EVENTS_EXCHANGE: str = "rcp.events"
     DLX_EXCHANGE: str = "rcp.dlx"
@@ -26,8 +28,6 @@ class Settings(BaseServiceSettings):
     # producer, e.g. logistics, declaring a disaster)
     DISASTER_EVENTS_QUEUE: str = "volunteer.disaster-events.q"
     DISASTER_EVENTS_DLQ: str = "dlq.volunteer.disaster-events"
-
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
 
 settings = Settings()

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/logistics/inventory-item-updated.v1.schema.json",
+  "title": "logistics.inventory.item-updated v1 (data payload)",
+  "type": "object",
+  "required": ["item_id", "category_id", "name", "quantity_total", "quantity_reserved", "quantity_available", "status"],
+  "properties": {
+    "item_id": { "type": "string", "format": "uuid" },
+    "category_id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string" },
+    "quantity_total": { "type": "integer", "minimum": 0 },
+    "quantity_reserved": { "type": "integer", "minimum": 0 },
+    "quantity_available": { "type": "integer", "minimum": 0 },
+    "status": { "type": "string", "enum": ["available", "reserved", "depleted", "expired"] },
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Source-of-truth timestamp; consumers reject older updates"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "event_id": "0d9f2f0a-3d0f-4a5f-9c3e-6a1b2c3d4e5f",
+  "event_type": "iam.user.registered",
+  "schema_version": 1,
+  "occurred_at": "2026-07-14T08:30:00+00:00",
+  "tenant_id": null,
+  "producer": "iam-service",
+  "trace_id": null,
+  "data": {
+    "user_id": "7c1e9a2b-4f6d-4e8a-b1c2-d3e4f5a6b7c8",
+    "tenant_id": null,
+    "user_type": "VOLUNTEER",
+    "email": "nimal@example.lk",
+    "full_name": "Nimal Perera",
+    "phone": "+94771234567",
+    "roles": [],
+    "is_active": true,
+    "updated_at": "2026-07-14T08:30:00+00:00"
+  }
+}

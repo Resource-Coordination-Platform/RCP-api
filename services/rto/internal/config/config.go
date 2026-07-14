@@ -3,6 +3,7 @@ package config
 import (
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -20,6 +21,11 @@ type Config struct {
 	DLXExchange    string
 	Queue          string
 	DLQ            string
+
+	// Origins allowed to open WebSocket connections (comma-separated).
+	// Empty = allow any origin, acceptable for local development only;
+	// production must list the web-admin / app origins.
+	WSAllowedOrigins []string
 }
 
 func getenv(key, fallback string) string {
@@ -46,5 +52,20 @@ func Load() Config {
 		DLXExchange:    getenv("DLX_EXCHANGE", "rcp.dlx"),
 		Queue:          getenv("EVENTS_QUEUE", "rto.domain-events.q"),
 		DLQ:            getenv("EVENTS_DLQ", "dlq.rto.domain-events"),
+
+		WSAllowedOrigins: splitCSV(os.Getenv("WS_ALLOWED_ORIGINS")),
 	}
+}
+
+func splitCSV(v string) []string {
+	if v == "" {
+		return nil
+	}
+	var out []string
+	for _, part := range strings.Split(v, ",") {
+		if trimmed := strings.TrimSpace(part); trimmed != "" {
+			out = append(out, trimmed)
+		}
+	}
+	return out
 }

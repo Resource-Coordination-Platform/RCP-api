@@ -13,8 +13,10 @@ class Settings(BaseServiceSettings):
     ACCESS_TOKEN_TTL_MINUTES: int = 15
     REFRESH_TOKEN_TTL_DAYS: int = 14
 
-    # local convenience: create tables on boot; prod uses Alembic migrations
-    AUTO_CREATE_TABLES: bool = True
+    # Alembic migrations are the source of truth for the schema. create_all
+    # on boot is a local-only convenience — opt in via the environment
+    # (docker-compose sets it) so a missing migration can never hide.
+    AUTO_CREATE_TABLES: bool = False
 
     EVENTS_EXCHANGE: str = "rcp.events"
 

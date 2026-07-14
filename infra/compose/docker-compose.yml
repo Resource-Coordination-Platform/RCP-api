@@ -4,6 +4,9 @@ x-common-env: &common-env
   RABBITMQ_URL: amqp://rcp:rcp_local_pw@rabbitmq:5672/rcp
   JWT_JWKS_URL: http://iam:8000/.well-known/jwks.json
   ENVIRONMENT: local
+  # local-only: create_all on boot. Never set outside compose — Alembic
+  # migrations are the schema source of truth (defaults to false in code).
+  AUTO_CREATE_TABLES: "true"
 
 services:
   db:

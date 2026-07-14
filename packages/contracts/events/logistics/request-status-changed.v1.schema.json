@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/logistics/request-status-changed.v1.schema.json",
+  "title": "logistics.request.status-changed v1 (data payload)",
+  "type": "object",
+  "required": ["request_id", "category_id", "quantity_needed", "status", "old_status", "new_status", "changed_by_user_id", "updated_at"],
+  "properties": {
+    "request_id": { "type": "string", "format": "uuid" },
+    "category_id": { "type": "string", "format": "uuid" },
+    "quantity_needed": { "type": "integer", "minimum": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "verified", "approved", "in_progress", "fulfilled", "rejected", "cancelled"],
+      "description": "The new status (duplicated in new_status for projection upserts)"
+    },
+    "old_status": {
+      "type": "string",
+      "enum": ["pending", "verified", "approved", "in_progress", "fulfilled", "rejected", "cancelled"]
+    },
+    "new_status": {
+      "type": "string",
+      "enum": ["pending", "verified", "approved", "in_progress", "fulfilled", "rejected", "cancelled"]
+    },
+    "requester_user_id": { "type": ["string", "null"], "format": "uuid" },
+    "changed_by_user_id": { "type": "string", "format": "uuid" },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Source-of-truth timestamp; consumers reject older updates"
+    }
+  }
+}

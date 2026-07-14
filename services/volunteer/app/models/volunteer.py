@@ -8,8 +8,9 @@ no cross-service call sits on the hot path.
 """
 
 import uuid
+from datetime import datetime
 
-from sqlalchemy import Boolean, Index, String
+from sqlalchemy import Boolean, DateTime, Index, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -42,6 +43,10 @@ class VolunteerProfile(Base, UUIDPkMixin, TimestampMixin):
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
     phone: Mapped[str | None] = mapped_column(String(30))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # IAM's timestamp for the identity fields above; guards replica upserts
+    # against out-of-order delivery. Never compare against local updated_at —
+    # that clock moves on every local profile edit.
+    source_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     # profile fields owned by THIS service (set via the mobile app)
     base_district: Mapped[str | None] = mapped_column(String(40), index=True)

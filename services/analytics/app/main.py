@@ -1,7 +1,6 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.responses import Response
 from rcp_common.logging import configure_logging
@@ -28,14 +27,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="RCP Analytics Service", lifespan=lifespan)
 app.state.service_name = settings.SERVICE_NAME
 
+# Browser traffic reaches this service only through the gateway, which owns
+# the single CORS layer — configuring it here too would double the headers.
 app.add_middleware(RequestContextMiddleware)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 app.include_router(routes_reports.router)
 

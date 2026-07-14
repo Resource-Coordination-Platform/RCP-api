@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/iam/tenant-created.v1.schema.json",
+  "title": "iam.tenant.created v1 (data payload)",
+  "type": "object",
+  "required": ["tenant_id", "name", "slug"],
+  "properties": {
+    "tenant_id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string" },
+    "slug": { "type": "string" }
+  }
+}

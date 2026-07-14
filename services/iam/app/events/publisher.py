@@ -1,11 +1,11 @@
-"""Outbox writer: call emit() inside the same Session/transaction as the
-state change. The relay worker (relay.py) does the actual AMQP publish."""
+"""Outbox writer: thin binding of rcp_common.outbox to this service's
+Outbox model. The envelope format lives exactly once, in packages/common."""
 
 import uuid
-from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy.orm import Session
+from rcp_common.outbox import emit as _emit
 
 from app.core.config import settings
 from app.models.outbox import Outbox
@@ -20,16 +20,13 @@ def emit(
     schema_version: int = 1,
     trace_id: str | None = None,
 ) -> None:
-    event_id = uuid.uuid4()
-    envelope = {
-        "event_id": str(event_id),
-        "event_type": routing_key,
-        "schema_version": schema_version,
-        "occurred_at": datetime.now(timezone.utc).isoformat(),
-        # None == event about a global (tenant-less) actor
-        "tenant_id": str(tenant_id) if tenant_id else None,
-        "producer": settings.SERVICE_NAME,
-        "trace_id": trace_id,
-        "data": data,
-    }
-    db.add(Outbox(event_id=event_id, routing_key=routing_key, payload=envelope))
+    _emit(
+        db,
+        outbox_model=Outbox,
+        producer=settings.SERVICE_NAME,
+        routing_key=routing_key,
+        tenant_id=tenant_id,
+        data=data,
+        schema_version=schema_version,
+        trace_id=trace_id,
+    )

@@ -19,40 +19,20 @@ END $$;
 
 GRANT USAGE, CREATE ON SCHEMA schema_analytics TO svc_analytics;
 
--- read model: SELECT-only access to today's logistics tables
-GRANT USAGE ON SCHEMA schema_logistics TO svc_analytics;
-GRANT SELECT ON ALL TABLES IN SCHEMA schema_logistics TO svc_analytics;
-
--- lock it down
+-- lock it down. Analytics is fed by logistics events over RabbitMQ into its
+-- own projection tables — it holds NO grants on schema_logistics. The
+-- revokes below also clean up the read-model grant that earlier versions
+-- of this script created (safe to re-run either way).
 REVOKE ALL ON SCHEMA public FROM svc_analytics;
 REVOKE ALL ON SCHEMA schema_iam FROM svc_analytics;
 REVOKE ALL ON SCHEMA schema_rto FROM svc_analytics;
+REVOKE SELECT ON ALL TABLES IN SCHEMA schema_logistics FROM svc_analytics;
+REVOKE ALL ON SCHEMA schema_logistics FROM svc_analytics;
 REVOKE ALL ON SCHEMA schema_analytics FROM svc_iam, svc_logistics, svc_rto;
 
 ALTER ROLE svc_analytics SET search_path = schema_analytics;
 
--- ============================================================
--- PART 2 — optional: auto-grant SELECT on *future* logistics tables.
--- Supabase's postgres is not a superuser, so ALTER DEFAULT PRIVILEGES
--- for/as another role needs temporary membership + SET ROLE. If this
--- part still errors on your project, skip it — the fallback is simply
--- re-running the GRANT SELECT ON ALL TABLES statement above after any
--- logistics migration that adds a table.
--- ============================================================
-
-GRANT svc_logistics TO postgres;
-SET ROLE svc_logistics;
-ALTER DEFAULT PRIVILEGES IN SCHEMA schema_logistics
-  GRANT SELECT ON TABLES TO svc_analytics;
-RESET ROLE;
-REVOKE svc_logistics FROM postgres;
-
--- Also cover tables created by postgres itself (e.g. via SQL editor or
--- migrations run as postgres):
-ALTER DEFAULT PRIVILEGES IN SCHEMA schema_logistics
-  GRANT SELECT ON TABLES TO svc_analytics;
-
 -- Verify:
 -- select nspname from pg_namespace where nspname = 'schema_analytics';
 -- select rolname from pg_roles where rolname = 'svc_analytics';
--- select has_schema_privilege('svc_analytics', 'schema_logistics', 'USAGE');
+-- select has_schema_privilege('svc_analytics', 'schema_logistics', 'USAGE');  -- must be false

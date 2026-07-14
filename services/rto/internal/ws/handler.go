@@ -10,11 +10,30 @@ import (
 	"github.com/rcp-platform/services/rto/internal/store"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	// tighten in production to the web-admin / app origins
-	CheckOrigin: func(r *http.Request) bool { return true },
+// newUpgrader builds an upgrader whose origin check is driven by
+// WS_ALLOWED_ORIGINS: an empty allow-list permits any origin (local dev);
+// production sets the web-admin / app origins explicitly.
+func newUpgrader(allowedOrigins []string) websocket.Upgrader {
+	return websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			if len(allowedOrigins) == 0 {
+				return true
+			}
+			origin := r.Header.Get("Origin")
+			if origin == "" {
+				// non-browser clients (mobile app) send no Origin header
+				return true
+			}
+			for _, allowed := range allowedOrigins {
+				if strings.EqualFold(origin, allowed) {
+					return true
+				}
+			}
+			return false
+		},
+	}
 }
 
 // tokenFromSubprotocol extracts the JWT from Sec-WebSocket-Protocol:
@@ -29,7 +48,8 @@ func tokenFromSubprotocol(r *http.Request) string {
 	return ""
 }
 
-func Handler(hub *Hub, verifier *auth.Verifier, st *store.Store) http.HandlerFunc {
+func Handler(hub *Hub, verifier *auth.Verifier, st *store.Store, allowedOrigins []string) http.HandlerFunc {
+	upgrader := newUpgrader(allowedOrigins)
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := tokenFromSubprotocol(r)
 		if token == "" {

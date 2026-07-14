@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/logistics/request-submitted.v1.schema.json",
+  "title": "logistics.request.submitted v1 (data payload)",
+  "type": "object",
+  "required": ["request_id", "category_id", "urgency", "quantity_needed", "status"],
+  "properties": {
+    "request_id": { "type": "string", "format": "uuid" },
+    "category_id": { "type": "string", "format": "uuid" },
+    "urgency": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "quantity_needed": { "type": "integer", "minimum": 1 },
+    "area": { "type": ["string", "null"] },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "verified", "approved", "in_progress", "fulfilled", "rejected", "cancelled"]
+    },
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Source-of-truth timestamp; consumers reject older updates"
+    }
+  }
+}

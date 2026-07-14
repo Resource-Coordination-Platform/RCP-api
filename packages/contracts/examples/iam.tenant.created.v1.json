@@ -1,0 +1,14 @@
+{
+  "event_id": "2f7e4d3c-6b8f-4a0c-9d2e-3f4a5b6c7d8e",
+  "event_type": "iam.tenant.created",
+  "schema_version": 1,
+  "occurred_at": "2026-07-14T07:00:00+00:00",
+  "tenant_id": "9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d",
+  "producer": "iam-service",
+  "trace_id": null,
+  "data": {
+    "tenant_id": "9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d",
+    "name": "Red Cross Colombo",
+    "slug": "red-cross-colombo"
+  }
+}

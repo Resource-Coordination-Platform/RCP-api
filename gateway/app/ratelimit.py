@@ -86,8 +86,18 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         )
         return bool(int(result))
 
+    @staticmethod
+    def _client_key(request: Request) -> str:
+        if settings.RATE_LIMIT_TRUST_FORWARDED:
+            forwarded = request.headers.get("x-forwarded-for", "")
+            if forwarded:
+                # leftmost entry = original client, as written by the trusted
+                # edge hop; only honored when explicitly enabled
+                return forwarded.split(",")[0].strip()
+        return request.client.host if request.client else "unknown"
+
     async def dispatch(self, request: Request, call_next) -> Response:
-        client = request.client.host if request.client else "unknown"
+        client = self._client_key(request)
         if self._redis is not None:
             allowed = await self._allow_redis(client)
         else:

@@ -43,20 +43,15 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA schema_volunteer
 ALTER DEFAULT PRIVILEGES IN SCHEMA schema_volunteer
   GRANT ALL ON SEQUENCES TO svc_volunteer;
 
--- Analytics is the one sanctioned exception to full isolation: it reads
--- the logistics schema as a *read model* — SELECT only, never write.
-GRANT USAGE ON SCHEMA schema_logistics TO svc_analytics;
-GRANT SELECT ON ALL TABLES IN SCHEMA schema_logistics TO svc_analytics;
--- On Supabase, postgres is not a true superuser: wrap the next statement in
--- GRANT svc_logistics TO postgres; ... REVOKE svc_logistics FROM postgres;
--- (see infra/supabase/add-analytics-schema.sql)
-ALTER DEFAULT PRIVILEGES FOR ROLE svc_logistics IN SCHEMA schema_logistics
-  GRANT SELECT ON TABLES TO svc_analytics;
+-- Analytics maintains its own projections in schema_analytics, fed by
+-- logistics events over RabbitMQ — it holds NO grants on schema_logistics.
+-- (The former SELECT-only read-model grant was removed when reporting
+-- moved to event-fed projections.)
 
 -- Belt and braces: no public schema, no cross-schema visibility
 REVOKE ALL ON SCHEMA public FROM svc_iam, svc_logistics, svc_rto, svc_analytics, svc_volunteer;
 REVOKE ALL ON SCHEMA schema_iam       FROM svc_logistics, svc_rto, svc_analytics, svc_volunteer;
-REVOKE ALL ON SCHEMA schema_logistics FROM svc_iam, svc_rto, svc_volunteer;
+REVOKE ALL ON SCHEMA schema_logistics FROM svc_iam, svc_rto, svc_analytics, svc_volunteer;
 REVOKE ALL ON SCHEMA schema_rto       FROM svc_iam, svc_logistics, svc_analytics, svc_volunteer;
 REVOKE ALL ON SCHEMA schema_analytics FROM svc_iam, svc_logistics, svc_rto, svc_volunteer;
 REVOKE ALL ON SCHEMA schema_volunteer FROM svc_iam, svc_logistics, svc_rto, svc_analytics;

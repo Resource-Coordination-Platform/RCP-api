@@ -58,9 +58,8 @@ func main() {
 
 	//HTTP Api (Routing)
 	mux := http.NewServeMux()
-	mux.HandleFunc("/ws", observe("/ws", func(w http.ResponseWriter, r *http.Request) {
-		ws.Handler(hub, verifier, st)(w, r)
-	}))
+	wsHandler := ws.Handler(hub, verifier, st, cfg.WSAllowedOrigins)
+	mux.HandleFunc("/ws", observe("/ws", wsHandler))
 	mux.HandleFunc("/health", observe("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "service": "rto-service"})

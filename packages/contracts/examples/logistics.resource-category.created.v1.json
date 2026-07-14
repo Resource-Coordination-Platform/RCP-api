@@ -1,0 +1,17 @@
+{
+  "event_id": "6e0d9c8b-1a3e-4f5b-8c7d-8e9f0a1b2c3d",
+  "event_type": "logistics.resource-category.created",
+  "schema_version": 1,
+  "occurred_at": "2026-07-14T06:45:00+00:00",
+  "tenant_id": "9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d",
+  "producer": "logistics-service",
+  "trace_id": null,
+  "data": {
+    "category_id": "5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f",
+    "name": "Drinking water",
+    "description": "Bottled or purified drinking water",
+    "unit": "litre",
+    "is_active": true,
+    "updated_at": "2026-07-14T06:45:00+00:00"
+  }
+}

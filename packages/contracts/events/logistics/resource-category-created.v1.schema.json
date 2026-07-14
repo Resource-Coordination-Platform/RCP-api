@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.rcp/events/logistics/resource-category-created.v1.schema.json",
+  "title": "logistics.resource-category.created v1 (data payload)",
+  "type": "object",
+  "required": ["category_id", "name", "unit", "is_active"],
+  "properties": {
+    "category_id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string" },
+    "description": { "type": ["string", "null"] },
+    "unit": { "type": "string" },
+    "is_active": { "type": "boolean" },
+    "updated_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Source-of-truth timestamp; consumers reject older updates"
+    }
+  }
+}

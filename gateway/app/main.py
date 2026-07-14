@@ -41,6 +41,7 @@ _service_clients: dict[str, ServiceClient] = {
     "iam": IAMClient(settings.IAM_URL),
     "logistics": LogisticsClient(settings.LOGISTICS_URL),
     "analytics": AnalyticsClient(settings.ANALYTICS_URL),
+    "volunteer": ServiceClient(settings.VOLUNTEER_URL),
     "rto": ServiceClient(settings.RTO_URL),
 }
 

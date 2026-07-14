@@ -28,6 +28,10 @@ channels:
     address: iam.user.deactivated
   iam.tenant.created:
     address: iam.tenant.created
+    messages:
+      tenantCreated:
+        payload:
+          $ref: "./events/iam/tenant-created.v1.schema.json"
   iam.tenant.suspended:
     address: iam.tenant.suspended
   iam.token.revoked:
@@ -42,8 +46,28 @@ channels:
     address: logistics.task.status-changed
   logistics.request.submitted:
     address: logistics.request.submitted
+    messages:
+      requestSubmitted:
+        payload:
+          $ref: "./events/logistics/request-submitted.v1.schema.json"
   logistics.request.status-changed:
     address: logistics.request.status-changed
+    messages:
+      requestStatusChanged:
+        payload:
+          $ref: "./events/logistics/request-status-changed.v1.schema.json"
+  logistics.resource-category.created:
+    address: logistics.resource-category.created
+    messages:
+      resourceCategoryCreated:
+        payload:
+          $ref: "./events/logistics/resource-category-created.v1.schema.json"
+  logistics.inventory.item-updated:
+    address: logistics.inventory.item-updated
+    messages:
+      inventoryItemUpdated:
+        payload:
+          $ref: "./events/logistics/inventory-item-updated.v1.schema.json"
   logistics.inventory.low-stock:
     address: logistics.inventory.low-stock
   logistics.offer.status-changed:
@@ -80,6 +104,11 @@ channels:
           $ref: "./events/volunteer/team-formed.v1.schema.json"
 
 operations:
+  analyticsConsumesLogisticsEvents:
+    action: receive
+    summary: "Queue analytics.projections.q <- logistics.request.*, logistics.inventory.*, logistics.resource-category.*"
+    channel:
+      $ref: "#/channels/logistics.request.submitted"
   logisticsConsumesIamEvents:
     action: receive
     summary: "Queue logistics.iam-events.q <- iam.user.*, iam.tenant.*"

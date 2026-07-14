@@ -1,0 +1,18 @@
+{
+  "event_id": "3a6f5e4d-7c9a-4b1d-8e3f-4a5b6c7d8e9f",
+  "event_type": "logistics.request.submitted",
+  "schema_version": 1,
+  "occurred_at": "2026-07-14T10:15:00+00:00",
+  "tenant_id": "9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d",
+  "producer": "logistics-service",
+  "trace_id": null,
+  "data": {
+    "request_id": "4b5c6d7e-8f9a-4b0c-9d1e-2f3a4b5c6d7e",
+    "category_id": "5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f",
+    "urgency": "high",
+    "quantity_needed": 40,
+    "area": "Kelaniya",
+    "status": "pending",
+    "updated_at": "2026-07-14T10:15:00+00:00"
+  }
+}
