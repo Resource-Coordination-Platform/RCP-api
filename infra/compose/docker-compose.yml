@@ -70,7 +70,7 @@ services:
       dockerfile: services/iam/Dockerfile
     environment:
       <<: *common-env
-      DATABASE_URL: postgresql+psycopg2://svc_iam:iam_local_pw@db:5432/rcp
+      DATABASE_URL: ${IAM_DATABASE_URL:-postgresql+psycopg2://svc_iam:iam_local_pw@db:5432/rcp}
       JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_signing_key
     ports: ["8001:8000"]
     depends_on:
@@ -84,7 +84,7 @@ services:
       dockerfile: services/logistics/Dockerfile
     environment:
       <<: *common-env
-      DATABASE_URL: postgresql+psycopg2://svc_logistics:logistics_local_pw@db:5432/rcp
+      DATABASE_URL: ${LOGISTICS_DATABASE_URL:-postgresql+psycopg2://svc_logistics:logistics_local_pw@db:5432/rcp}
     ports: ["8002:8000"]
     depends_on:
       db: { condition: service_healthy }
@@ -97,7 +97,7 @@ services:
       dockerfile: services/analytics/Dockerfile
     environment:
       <<: *common-env
-      DATABASE_URL: postgresql+psycopg2://svc_analytics:analytics_local_pw@db:5432/rcp
+      DATABASE_URL: ${ANALYTICS_DATABASE_URL:-postgresql+psycopg2://svc_analytics:analytics_local_pw@db:5432/rcp}
     ports: ["8003:8000"]
     depends_on:
       db: { condition: service_healthy }
@@ -111,7 +111,7 @@ services:
       dockerfile: services/volunteer/Dockerfile
     environment:
       <<: *common-env
-      DATABASE_URL: postgresql+psycopg2://svc_volunteer:volunteer_local_pw@db:5432/rcp
+      DATABASE_URL: ${VOLUNTEER_DATABASE_URL:-postgresql+psycopg2://svc_volunteer:volunteer_local_pw@db:5432/rcp}
     ports: ["8004:8000"]
     depends_on:
       db: { condition: service_healthy }
@@ -122,7 +122,7 @@ services:
     build: ../../services/rto
     environment:
       <<: *common-env
-      DATABASE_URL: postgres://svc_rto:rto_local_pw@db:5432/rcp
+      DATABASE_URL: ${RTO_DATABASE_URL:-postgres://svc_rto:rto_local_pw@db:5432/rcp}
     ports: ["8080:8080"]
     depends_on:
       db: { condition: service_healthy }
