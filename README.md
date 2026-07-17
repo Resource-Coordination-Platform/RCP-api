@@ -84,3 +84,6 @@ CORS for the separate frontend repo is handled at the gateway
 
 For the folder structure conventions per service, see
 [docs/microservice-folder-structure.md](docs/microservice-folder-structure.md).
+
+
+ok now containers running smoothly
