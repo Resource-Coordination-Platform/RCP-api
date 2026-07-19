@@ -34,7 +34,7 @@ def my_assignments(
         .order_by(EventVolunteerMapping.created_at.desc())
     ).all()
 
-
+            
 @router.post("/{assignment_id}/accept", response_model=AssignmentRead)
 def accept(
     assignment_id: uuid.UUID,

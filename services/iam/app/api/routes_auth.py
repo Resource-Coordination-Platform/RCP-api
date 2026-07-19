@@ -28,7 +28,7 @@ def onboard_tenant(data: TenantOnboard, db: Session = Depends(get_db)):
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register_global(data: GlobalUserRegister, db: Session = Depends(get_db)):
-    """Mobile-app signup (global pool: VOLUNTEER / VICTIM / DONATOR)."""
+    """Mobile-app signup (global pool: VOLUNTEER / VICTIM )."""
     if data.user_type not in GLOBAL_USER_TYPES:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
