@@ -1,0 +1,20 @@
+$kind: http-request
+name: Update My Profile
+description: Update the volunteer's operational profile (district, city, skills, availability).
+url: '{{gatewayUrl}}/api/volunteer/profiles/me'
+method: PUT
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "base_district": "colombo",
+      "city": "Colombo",
+      "available_status": true,
+      "skills": ["first_aid", "rescue", "driving"]
+    }
+order: 2000

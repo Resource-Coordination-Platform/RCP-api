@@ -1,0 +1,11 @@
+$kind: http-request
+name: Active Routes
+description: Returns the gateway routing table (debug aid).
+url: '{{gatewayUrl}}/routes'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+order: 4000

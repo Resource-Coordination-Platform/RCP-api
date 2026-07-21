@@ -1,0 +1,15 @@
+$kind: collection
+name: RCP Platform (Gateway)
+description: |-
+  Unified collection for the Resource Coordination Platform.
+  All requests route through the API Gateway (http://localhost:8000).
+  
+  Variables needed:
+  - gatewayUrl: http://localhost:8000
+  - bearerToken: <JWT access token from Login>
+  - tenantSlug: <your tenant slug>
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{bearerToken}}'

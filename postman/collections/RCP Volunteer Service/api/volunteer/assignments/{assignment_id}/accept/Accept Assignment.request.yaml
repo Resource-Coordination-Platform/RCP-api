@@ -1,0 +1,16 @@
+$kind: http-request
+description: |-
+  Accept a volunteer assignment. First-come-first-serve: a 409 means the
+  skill bucket filled before this volunteer tapped Accept.
+url: '{{baseUrl}}/api/volunteer/assignments/:assignment_id/accept'
+method: POST
+headers:
+  Accept: application/json
+pathVariables:
+  assignment_id: 74d97a52-704c-fbf8-c761-84709815af07
+auth:
+  type: bearer
+  credentials:
+    token: '{{bearerToken}}'
+examples: ./.resources/Accept Assignment.resources/examples
+order: 1000

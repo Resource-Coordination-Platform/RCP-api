@@ -1,0 +1,23 @@
+$kind: http-request
+description: |-
+  Web-portal signup under a tenant. Self-registration is COORDINATOR
+  only; TENANT_ADMIN exists solely through tenant onboarding.
+url: '{{baseUrl}}/api/auth/tenants/:tenant_slug/register'
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+pathVariables:
+  tenant_slug: my-tenant
+body:
+  type: json
+  content: |-
+    {
+      "email": "coordinator@example.com",
+      "password": "stringstring",
+      "full_name": "string",
+      "phone": null,
+      "user_type": "COORDINATOR"
+    }
+examples: ./.resources/Register Tenant User.resources/examples
+order: 1000

@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/inventory/items"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "category_id": "c3f420bb-4c99-2d37-c9a8-fbbf2111f848",
+      "name": "string",
+      "quantity_total": 9763,
+      "expiry_date": null,
+      "storage_location": "string",
+      "donor_name": null
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Add Item.resources/examples
+order: 3000

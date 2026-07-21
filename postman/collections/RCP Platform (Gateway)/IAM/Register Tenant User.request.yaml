@@ -1,0 +1,22 @@
+$kind: http-request
+name: Register Tenant User
+description: Web-portal signup under a tenant. Self-registration is COORDINATOR only.
+url: '{{gatewayUrl}}/api/auth/tenants/{{tenantSlug}}/register'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+body:
+  type: json
+  content: |-
+    {
+      "email": "coordinator@relief-org.lk",
+      "password": "securepass123",
+      "full_name": "Coordinator User",
+      "user_type": "COORDINATOR"
+    }
+order: 3000

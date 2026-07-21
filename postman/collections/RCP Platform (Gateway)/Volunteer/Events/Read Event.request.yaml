@@ -1,0 +1,9 @@
+$kind: http-request
+name: Read Event
+description: Get details of a specific disaster event.
+url: '{{gatewayUrl}}/api/volunteer/events/{{eventId}}'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+order: 4000

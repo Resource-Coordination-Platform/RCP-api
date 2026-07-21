@@ -1,0 +1,17 @@
+$kind: http-request
+name: List Requests
+description: List help requests with optional status filter (tenant_admin or coordinator).
+url: '{{gatewayUrl}}/api/requests'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+queryParams:
+  - key: status_filter
+    value: ''
+    disabled: true
+  - key: limit
+    value: '50'
+  - key: offset
+    value: '0'
+order: 2000

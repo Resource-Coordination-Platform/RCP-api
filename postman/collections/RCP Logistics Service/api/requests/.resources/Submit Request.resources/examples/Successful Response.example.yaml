@@ -1,0 +1,56 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/requests"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "category_id": "3ede9d98-2865-f1cb-ad44-2c11f6006085",
+        "description": "string",
+        "quantity_needed": 1,
+        "urgency": "critical",
+        "requester_name": "string",
+        "requester_phone": "string",
+        "area": null,
+        "latitude": 2445.233834498034,
+        "longitude": 1521.7622390676256,
+        "is_sensitive": false,
+        "extra_fields": {
+          "key_0": false,
+          "key_1": 5623.310684746942,
+          "key_2": false,
+          "key_3": 5295
+        }
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "id": "74b330b8-eb3a-8958-c20a-4dd9b3c34a33",
+        "tenant_id": "2d8b3784-e7fb-1cb4-7e0d-9fd9a9077962",
+        "category_id": "fc3a9dae-e5e1-eded-7791-f5091b6e0530",
+        "description": "string",
+        "quantity_needed": 9705,
+        "urgency": "high",
+        "status": "rejected",
+        "area": null,
+        "is_sensitive": true,
+        "created_at": "2009-12-02T03:14:09.569Z",
+        "verified_at": null,
+        "fulfilled_at": null
+      }
+order: 1000

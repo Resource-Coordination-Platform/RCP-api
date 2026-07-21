@@ -1,0 +1,9 @@
+$kind: http-request
+name: Accept Assignment
+description: Accept a volunteer assignment (first-come-first-serve; 409 if quota full).
+url: '{{gatewayUrl}}/api/volunteer/assignments/{{assignmentId}}/accept'
+method: POST
+headers:
+  - key: Accept
+    value: application/json
+order: 2000

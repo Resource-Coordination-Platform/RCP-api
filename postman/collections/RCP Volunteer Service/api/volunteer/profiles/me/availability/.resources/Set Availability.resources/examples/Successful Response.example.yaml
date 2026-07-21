@@ -1,0 +1,42 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/volunteer/profiles/me/availability"
+  method: PATCH
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "available_status": false
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "id": "110825c2-bc02-0c7c-844d-8ae277fc52c5",
+        "user_id": "16e93061-25d9-61c6-6982-9b0ecdfeb278",
+        "full_name": "string",
+        "phone": null,
+        "base_district": null,
+        "city": "string",
+        "available_status": false,
+        "skills": [
+          "string",
+          "string"
+        ],
+        "is_active": true,
+        "created_at": "1988-09-21T13:39:20.433Z"
+      }
+order: 1000

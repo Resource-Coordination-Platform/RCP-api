@@ -1,0 +1,22 @@
+$kind: http-request
+name: Add Item
+description: Add an inventory item to a category (tenant_admin or coordinator).
+url: '{{gatewayUrl}}/api/inventory/items'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "category_id": "{{categoryId}}",
+      "name": "First Aid Kit",
+      "quantity_total": 100,
+      "expiry_date": null,
+      "storage_location": "Warehouse A",
+      "donor_name": null
+    }
+order: 3000

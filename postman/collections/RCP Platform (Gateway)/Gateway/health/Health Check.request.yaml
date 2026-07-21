@@ -1,0 +1,11 @@
+$kind: http-request
+name: Health Check
+description: Gateway health check — also fans out to all downstream services.
+url: '{{gatewayUrl}}/health'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+order: 1000

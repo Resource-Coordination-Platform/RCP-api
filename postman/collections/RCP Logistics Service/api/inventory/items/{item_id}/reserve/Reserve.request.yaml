@@ -1,0 +1,21 @@
+$kind: http-request
+name: Reserve
+url: "{{baseUrl}}/api/inventory/items/:item_id/reserve?quantity=10"
+method: POST
+headers:
+  Accept: application/json
+queryParams:
+  quantity: "10"
+pathVariables:
+  - key: item_id
+    value: d77e0ae0-e5ae-4bc0-98eb-ba7b94b37914
+    description: ""
+body:
+  type: json
+  content: ""
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Reserve.resources/examples
+order: 1000

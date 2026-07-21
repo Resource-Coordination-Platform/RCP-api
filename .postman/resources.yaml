@@ -1,0 +1,18 @@
+# Use this workspace to collaborate
+workspace:
+  id: a11842cf-5657-473f-8321-df2ce003bd66
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/RCP IAM Service: 28b31212-cee8-45d5-899b-42028555ca3f
+    ../postman/collections/RCP Logistics Service: c9b87133-9c20-4eae-81f9-e54abc5cca0c
+    ../postman/collections/RCP Analytics Service: b4bdeab9-c224-4a88-9a1c-911d52bf3c46
+    ../postman/collections/RCP Volunteer Service: a4ee0055-c243-4e67-a9f4-39dea8dd6006
+
+# All resources in the `postman/` folder are automatically registered in Local View.
+# Point to additional files outside the `postman/` folder to register them individually. Example:
+#localResources:
+#  collections:
+#    - ../tests/E2E Test Collection/

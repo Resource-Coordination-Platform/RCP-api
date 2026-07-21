@@ -1,0 +1,17 @@
+$kind: http-request
+name: Update Request Status
+description: Update the status of a help request (tenant_admin or coordinator).
+url: '{{gatewayUrl}}/api/requests/{{requestId}}/status'
+method: PATCH
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "status": "VERIFIED"
+    }
+order: 3000

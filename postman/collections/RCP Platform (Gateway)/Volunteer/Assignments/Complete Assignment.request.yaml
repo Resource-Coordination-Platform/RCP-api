@@ -1,0 +1,9 @@
+$kind: http-request
+name: Complete Assignment
+description: Mark a volunteer assignment as completed.
+url: '{{gatewayUrl}}/api/volunteer/assignments/{{assignmentId}}/complete'
+method: POST
+headers:
+  - key: Accept
+    value: application/json
+order: 5000

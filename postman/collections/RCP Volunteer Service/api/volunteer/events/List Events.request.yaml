@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/volunteer/events"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/List Events.resources/examples
+order: 3000

@@ -1,0 +1,14 @@
+$kind: http-request
+description: Mark a volunteer assignment as en-route (volunteer is on the way to the site).
+url: '{{baseUrl}}/api/volunteer/assignments/:assignment_id/en-route'
+method: POST
+headers:
+  Accept: application/json
+pathVariables:
+  assignment_id: 74d97a52-704c-fbf8-c761-84709815af07
+auth:
+  type: bearer
+  credentials:
+    token: '{{bearerToken}}'
+examples: ./.resources/En Route.resources/examples
+order: 3000

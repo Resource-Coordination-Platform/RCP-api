@@ -1,0 +1,17 @@
+$kind: http-request
+name: Set Availability
+description: Toggle the volunteer's availability status.
+url: '{{gatewayUrl}}/api/volunteer/profiles/me/availability'
+method: PATCH
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "available_status": true
+    }
+order: 3000

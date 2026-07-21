@@ -1,0 +1,9 @@
+$kind: http-request
+name: Read My Profile
+description: Get the authenticated volunteer's profile (VOLUNTEER role required).
+url: '{{gatewayUrl}}/api/volunteer/profiles/me'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+order: 1000

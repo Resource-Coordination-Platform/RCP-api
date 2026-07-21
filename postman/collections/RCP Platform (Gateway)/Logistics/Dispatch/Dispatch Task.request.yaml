@@ -1,0 +1,20 @@
+$kind: http-request
+name: Dispatch Task
+description: Assign a dispatch task to a volunteer (tenant_admin or coordinator).
+url: '{{gatewayUrl}}/api/volunteers/tasks'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "request_id": "{{requestId}}",
+      "volunteer_user_id": "{{volunteerId}}",
+      "title": "Deliver medical supplies to Colombo",
+      "instructions": "Contact the site coordinator on arrival"
+    }
+order: 2000

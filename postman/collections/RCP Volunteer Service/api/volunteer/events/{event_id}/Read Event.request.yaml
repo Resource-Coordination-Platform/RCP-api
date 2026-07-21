@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/volunteer/events/:event_id"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  event_id: 74d97a52-704c-fbf8-c761-84709815af07
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Read Event.resources/examples
+order: 3000

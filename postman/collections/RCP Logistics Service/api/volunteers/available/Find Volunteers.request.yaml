@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/volunteers/available?skill=string&area=string"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  skill: string
+  area: string
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Find Volunteers.resources/examples
+order: 1000

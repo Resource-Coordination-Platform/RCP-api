@@ -1,0 +1,42 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/auth/tenants/:tenant_slug/register"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: application/json
+  pathVariables:
+    tenant_slug: string
+  body:
+    type: json
+    content: |-
+      {
+        "email": "o4jwH2V@gWuyYyXGXfSgLirUqqZstIVBfoMkG.jbsh",
+        "password": "stringstring",
+        "full_name": "string",
+        "phone": null,
+        "user_type": "TENANT_ADMIN"
+      }
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "id": "e5447dd9-6e3d-0736-44e4-36a6e83b867a",
+        "tenant_id": "e9cc7f26-0237-42ee-3de2-c0bff2023373",
+        "user_type": "VOLUNTEER",
+        "email": "G335ar0p1WtY@yfkStOsFAWQKhnPFgyRf.wldh",
+        "full_name": "string",
+        "phone": "string",
+        "status": "string",
+        "roles": [
+          "string",
+          "string"
+        ],
+        "created_at": "2006-12-17T15:08:50.882Z"
+      }
+order: 1000

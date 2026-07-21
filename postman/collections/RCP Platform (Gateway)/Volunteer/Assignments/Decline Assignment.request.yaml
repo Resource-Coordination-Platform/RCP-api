@@ -1,0 +1,9 @@
+$kind: http-request
+name: Decline Assignment
+description: Decline a volunteer assignment.
+url: '{{gatewayUrl}}/api/volunteer/assignments/{{assignmentId}}/decline'
+method: POST
+headers:
+  - key: Accept
+    value: application/json
+order: 3000

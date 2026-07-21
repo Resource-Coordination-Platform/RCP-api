@@ -1,0 +1,27 @@
+$kind: http-request
+name: Submit Request
+description: Submit a help request (any authenticated user).
+url: '{{gatewayUrl}}/api/requests'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "category_id": "{{categoryId}}",
+      "description": "Need 10 first aid kits urgently",
+      "quantity_needed": 10,
+      "urgency": "HIGH",
+      "requester_name": "John Doe",
+      "requester_phone": "+94771234567",
+      "area": "Colombo",
+      "latitude": 6.9271,
+      "longitude": 79.8612,
+      "is_sensitive": false,
+      "extra_fields": null
+    }
+order: 1000

@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/api/volunteer/events"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "source_district": "string",
+      "requirements": [
+        {
+          "skill": "string",
+          "required_count": 378
+        }
+      ],
+      "description": "string",
+      "broadcast_type": "RADIUS_L1",
+      "target_districts": null
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Declare Event.resources/examples
+order: 4000

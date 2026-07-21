@@ -1,0 +1,21 @@
+$kind: http-request
+description: |-
+  One endpoint, two populations: requests carrying tenant_slug resolve
+  against that tenant's users; requests without it resolve against the
+  global pool. A portal user can never log in through the mobile path
+  (and vice versa) because the lookups are disjoint by tenant_id.
+url: "{{baseUrl}}/api/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "WIA554CI@NGtbh.hcqz",
+      "password": "string",
+      "tenant_slug": "string"
+    }
+examples: ./.resources/Login.resources/examples
+order: 1000

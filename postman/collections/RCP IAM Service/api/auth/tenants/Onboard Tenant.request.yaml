@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/tenants"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "string",
+      "slug": "5u1-uof2fs9o9l1l-d0-5vflbnlu1evldc4br2acov21xvel5dnea6",
+      "admin_email": "xQJnPrLRCr-me@gkjqLy.tx",
+      "admin_password": "stringstring",
+      "admin_full_name": "string",
+      "description": "string"
+    }
+examples: ./.resources/Onboard Tenant.resources/examples
+order: 2000

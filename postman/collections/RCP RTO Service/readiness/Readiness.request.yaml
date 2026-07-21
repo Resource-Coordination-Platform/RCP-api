@@ -1,0 +1,11 @@
+$kind: http-request
+name: Readiness
+description: 'Kubernetes readiness probe — checks database connectivity.'
+url: '{{rtoUrl}}/readiness'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+order: 1000

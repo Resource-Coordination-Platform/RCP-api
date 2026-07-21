@@ -1,0 +1,24 @@
+$kind: http-request
+name: Onboard Tenant
+description: Creates a new tenant plus its first tenant_admin user in one step.
+url: '{{gatewayUrl}}/api/auth/tenants'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+body:
+  type: json
+  content: |-
+    {
+      "name": "Relief Org Sri Lanka",
+      "slug": "relief-org-lk",
+      "description": "Disaster relief coordination org",
+      "admin_email": "admin@relief-org.lk",
+      "admin_password": "securepass123",
+      "admin_full_name": "Admin User"
+    }
+order: 1000

@@ -1,0 +1,9 @@
+$kind: http-request
+name: List Categories
+description: List all resource categories for the authenticated tenant.
+url: '{{gatewayUrl}}/api/inventory/categories'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+order: 2000

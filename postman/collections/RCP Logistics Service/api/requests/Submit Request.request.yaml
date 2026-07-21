@@ -1,0 +1,33 @@
+$kind: http-request
+url: "{{baseUrl}}/api/requests"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "category_id": "3ede9d98-2865-f1cb-ad44-2c11f6006085",
+      "description": "string",
+      "quantity_needed": 1,
+      "urgency": "critical",
+      "requester_name": "string",
+      "requester_phone": "string",
+      "area": null,
+      "latitude": 2445.233834498034,
+      "longitude": 1521.7622390676256,
+      "is_sensitive": false,
+      "extra_fields": {
+        "key_0": false,
+        "key_1": 5623.310684746942,
+        "key_2": false,
+        "key_3": 5295
+      }
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Submit Request.resources/examples
+order: 2000

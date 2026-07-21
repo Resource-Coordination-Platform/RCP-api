@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/inventory/categories"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "string",
+      "description": "string",
+      "unit": "unit",
+      "form_schema": null
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Create Category.resources/examples
+order: 2000

@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/reports/request-summary"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Request Summary.resources/examples
+order: 1000

@@ -1,0 +1,10 @@
+$kind: http-request
+description: |-
+  Public verification keys. Logistics and RTO cache this document and
+  verify every JWT locally — no service ever queries schema_iam.
+url: "{{baseUrl}}/.well-known/jwks.json"
+method: GET
+headers:
+  Accept: application/json
+examples: ./.resources/Jwks.resources/examples
+order: 1000

@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/reports/need-vs-fulfillment"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Need Vs Fulfillment.resources/examples
+order: 1000

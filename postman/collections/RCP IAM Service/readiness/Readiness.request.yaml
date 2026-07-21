@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseUrl}}/readiness"
+method: GET
+headers:
+  Accept: application/json
+examples: ./.resources/Readiness.resources/examples
+order: 1000

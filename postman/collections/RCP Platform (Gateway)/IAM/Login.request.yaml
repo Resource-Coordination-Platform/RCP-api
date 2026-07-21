@@ -1,0 +1,24 @@
+$kind: http-request
+name: Login
+description: |-
+  One endpoint, two populations: requests carrying tenant_slug resolve
+  against that tenant's users; requests without it resolve against the
+  global pool (mobile app).
+url: '{{gatewayUrl}}/api/auth/login'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+body:
+  type: json
+  content: |-
+    {
+      "email": "admin@relief-org.lk",
+      "password": "securepass123",
+      "tenant_slug": "{{tenantSlug}}"
+    }
+order: 4000

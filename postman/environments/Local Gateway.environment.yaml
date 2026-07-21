@@ -1,0 +1,6 @@
+name: Local Gateway
+values:
+  - key: baseUrl
+    value: ''
+  - key: bearerToken
+    secret: true

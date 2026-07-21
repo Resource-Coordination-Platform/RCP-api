@@ -1,0 +1,11 @@
+$kind: http-request
+name: Liveness
+description: Kubernetes liveness probe.
+url: '{{rtoUrl}}/liveness'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+order: 1000
