@@ -6,3 +6,4 @@ venv/
 *.tfstate*
 .terraform/
 infra/compose/secrets/*.pem
+k8s*
