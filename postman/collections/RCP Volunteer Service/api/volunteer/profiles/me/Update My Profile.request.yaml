@@ -1,5 +1,6 @@
 $kind: http-request
-url: "{{baseUrl}}/api/volunteer/profiles/me"
+name: Update My Profile
+url: "{{baseUrl}}/api/volunteer/profiles"
 method: PUT
 headers:
   Content-Type: application/json
@@ -8,12 +9,12 @@ body:
   type: json
   content: |-
     {
-      "base_district": "string",
-      "city": "string",
-      "available_status": false,
+      "base_district": "Colombo",
+      "city": "Colombo",
+      "available_status": true,
       "skills": [
-        "string",
-        "string"
+        "First Aid",
+        "Driving"
       ]
     }
 auth:

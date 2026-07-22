@@ -1,6 +1,16 @@
 name: Local Gateway
 values:
-  - key: baseUrl
+  - key: gatewayUrl
+    value: ''
+  - key: tenantSlug
+    value: ''
+  - key: assignmentId
+    value: ''
+  - key: categoryId
+    value: ''
+  - key: requestId
+    value: ''
+  - key: volunteerId
     value: ''
   - key: bearerToken
-    secret: true
+    value: ''

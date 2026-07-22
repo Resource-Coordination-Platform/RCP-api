@@ -1,6 +1,7 @@
 $kind: http-request
+name: Reserve Item
 description: Reserve a quantity of an inventory item. Requires tenant_admin or coordinator role.
-url: '{{baseUrl}}/api/inventory/items/:item_id/reserve'
+url: "{{baseUrl}}/api/inventory/items/:item_id/reserve"
 method: POST
 headers:
   Accept: application/json
@@ -9,9 +10,12 @@ pathVariables:
 params:
   - key: quantity
     value: '10'
+body:
+  type: json
+  content: ""
 auth:
   type: bearer
   credentials:
-    token: '{{bearerToken}}'
+    token: "{{bearerToken}}"
 examples: ./.resources/Reserve Item.resources/examples
 order: 1000

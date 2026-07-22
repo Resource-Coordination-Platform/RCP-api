@@ -1,4 +1,5 @@
 $kind: http-request
+name: Create Category
 url: "{{baseUrl}}/api/inventory/categories"
 method: POST
 headers:
@@ -8,9 +9,9 @@ body:
   type: json
   content: |-
     {
-      "name": "string",
-      "description": "string",
-      "unit": "unit",
+      "name": "Dry Rations",
+      "description": "Essential dry food items and grains",
+      "unit": "kg",
       "form_schema": null
     }
 auth:

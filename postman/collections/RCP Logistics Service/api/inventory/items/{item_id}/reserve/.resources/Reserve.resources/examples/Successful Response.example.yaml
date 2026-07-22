@@ -12,6 +12,9 @@ request:
     quantity: "1532"
   pathVariables:
     item_id: 8fa46152-40de-4be7-4e05-5483617c10a6
+  body:
+    type: json
+    content: ""
 response:
   statusCode: 200
   statusText: OK

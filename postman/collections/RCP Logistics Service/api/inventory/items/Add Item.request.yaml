@@ -1,4 +1,5 @@
 $kind: http-request
+name: Add Item
 url: "{{baseUrl}}/api/inventory/items"
 method: POST
 headers:
@@ -8,12 +9,12 @@ body:
   type: json
   content: |-
     {
-      "category_id": "c3f420bb-4c99-2d37-c9a8-fbbf2111f848",
-      "name": "string",
-      "quantity_total": 9763,
-      "expiry_date": null,
-      "storage_location": "string",
-      "donor_name": null
+      "category_id": "47f81f8b-d64d-43d2-bb57-0581575e0426",
+      "name": "White Sugar",
+      "quantity_total": 150,
+      "expiry_date": "2027-05-20",
+      "storage_location": "Main Warehouse, Colombo",
+      "donor_name": "Red Cross"
     }
 auth:
   type: bearer

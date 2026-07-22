@@ -1,4 +1,5 @@
 $kind: http-request
+name: Login
 description: |-
   One endpoint, two populations: requests carrying tenant_slug resolve
   against that tenant's users; requests without it resolve against the
@@ -11,11 +12,19 @@ headers:
   Accept: application/json
 body:
   type: json
-  content: |-
-    {
-      "email": "WIA554CI@NGtbh.hcqz",
-      "password": "string",
-      "tenant_slug": "string"
-    }
+  content: "{\r
+
+    \  \"email\": \"nimal@dro.lk\",\r
+
+    \  \"password\": \"VolunteerPassword@123\"\r
+
+    }"
+scripts:
+  - type: beforeRequest
+    code: ""
+    language: text/javascript
+  - type: afterResponse
+    code: pm.environment.set("adminToken", pm.response.json().access_token);
+    language: text/javascript
 examples: ./.resources/Login.resources/examples
 order: 1000

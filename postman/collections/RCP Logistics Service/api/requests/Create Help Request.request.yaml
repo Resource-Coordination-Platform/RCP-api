@@ -1,4 +1,24 @@
 $kind: http-request
-url: ""
-method: GET
+name: Create Help Request
+url: "{{baseUrl}}/api/requests"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"title\": \"Urgent Food Assistance for Kamal\",\r
+
+    \  \"description\": \"Need 10kg of Samba Rice immediately\",\r
+
+    \  \"priority\": \"HIGH\",\r
+
+    \  \"location_city\": \"Colombo\",\r
+
+    \  \"category_id\": \"47f81f8b-d64d-43d2-bb57-0581575e0426\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
 order: 3035289918374865

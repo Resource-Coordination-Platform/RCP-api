@@ -1,4 +1,5 @@
 $kind: http-request
+name: Register Global
 description: "Mobile-app signup (global pool: VOLUNTEER / VICTIM / DONATOR)."
 url: "{{baseUrl}}/api/auth/register"
 method: POST
@@ -9,11 +10,10 @@ body:
   type: json
   content: |-
     {
-      "email": "lnkdJk6meK@DNCaJ.ywxr",
-      "password": "stringstring",
-      "full_name": "string",
-      "user_type": "VICTIM",
-      "phone": null
+      "email": "nimal@dro.lk",
+      "password": "VolunteerPassword@123",
+      "full_name": "Nimal Fernando",
+      "user_type": "volunteer"
     }
 examples: ./.resources/Register Global.resources/examples
 order: 1000
