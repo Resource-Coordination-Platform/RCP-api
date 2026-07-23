@@ -14,7 +14,8 @@ from app.schemas.auth_schema import (
     TokenPair,
     UserRead,
 )
-from app.services import auth as auth_service
+from app.services import auth as auth_service 
+
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -84,3 +85,13 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
     if pair is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid refresh token")
     return pair
+
+
+
+""" New additional endpoints added by Kesh"""
+# අලුතින් එකතු කරන GET Endpoint එක
+@router.get("/tenants", response_model=list[TenantRead])
+def get_tenants(db: Session = Depends(get_db)):
+    """මෙමඟින් සියලුම Tenants ලාගේ ලැයිස්තුව ලබාදේ."""
+    # අපි කලින් auth.py එකේ ලියපු function එකට කතා කරනවා
+    return auth_service.get_all_tenants(db)

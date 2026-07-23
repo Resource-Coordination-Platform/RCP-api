@@ -198,3 +198,16 @@ def refresh(db: Session, raw_token: str) -> TokenPair | None:
 
     record.revoked_at = now  # rotate: old token is spent
     return _issue_pair(db, user, rotated_from=record.id)
+
+
+
+#New Additional Functions added by Kesh
+####
+
+
+
+
+# Database එකෙන් සේරම Tenants ලව අරන් එන Function එක
+def get_all_tenants(db: Session):
+    # 'Tenant' Table එකේ තියෙන සේරම rows ටික අරන් List එකක් විදිහට දෙනවා
+    return db.scalars(select(Tenant)).all()
