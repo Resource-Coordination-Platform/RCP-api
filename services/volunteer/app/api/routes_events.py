@@ -44,7 +44,7 @@ def declare_event(
 
 
 
-# 1. Events ලිස්ට් එක ගන්න Endpoint එක
+# 1. Events ලිස්ට් එක ගන්න Endpoint eka
 @router.get("", response_model=list[DisasterEventRead])
 def list_events(
     principal: Principal = Depends(require_roles("tenant_admin", "coordinator", "volunteer")),
