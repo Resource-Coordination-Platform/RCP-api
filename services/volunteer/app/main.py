@@ -6,7 +6,7 @@ from rcp_common.logging import configure_logging
 from rcp_common.metrics import render_prometheus_metrics
 from rcp_common.middleware import RequestContextMiddleware
 
-from app.api import routes_assignments, routes_events, routes_profiles
+from app.api import routes_assignments, routes_directory, routes_events, routes_profiles
 from app.core.config import settings
 from app.db.database import engine
 from app.events.consumers.disaster import start_consumer as start_disaster_consumer
@@ -38,6 +38,7 @@ app.state.service_name = settings.SERVICE_NAME
 app.add_middleware(RequestContextMiddleware)
 
 app.include_router(routes_profiles.router)
+app.include_router(routes_directory.router)
 app.include_router(routes_events.router)
 app.include_router(routes_assignments.router)
 

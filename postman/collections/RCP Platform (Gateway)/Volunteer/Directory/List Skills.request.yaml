@@ -1,0 +1,11 @@
+$kind: http-request
+name: List Skills
+description: >-
+  Distinct skill slugs present in the volunteer pool — the facet list the admin
+  dashboard's skill filter is built from.
+url: '{{gatewayUrl}}/api/volunteer/directory/skills'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+order: 2000

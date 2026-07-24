@@ -24,7 +24,8 @@ class Settings(BaseServiceSettings):
 
     PROXY_TIMEOUT_SECONDS: float = 30.0
 
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    # 3000 = tenant-admin portal, 3001 = super-admin (platform operator) console
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
 
 
 settings = Settings()
@@ -33,6 +34,7 @@ settings = Settings()
 # no business rules, no data access, no token minting.
 ROUTE_TABLE: dict[str, str] = {
     "/api/auth": settings.IAM_URL,
+    "/api/admin": settings.IAM_URL,
     "/.well-known": settings.IAM_URL,
     "/api/requests": settings.LOGISTICS_URL,
     "/api/inventory": settings.LOGISTICS_URL,

@@ -19,7 +19,12 @@ class InventoryStatus(str, enum.Enum):
 
 class ResourceCategory(Base, UUIDPkMixin, TenantMixin, TimestampMixin):
     """The customizable workflow engine: admins define categories with a
-    JSONB form schema, no code changes required."""
+    JSONB form schema and approval flow, no code changes required.
+
+    Both JSONB columns are validated before they are written
+    (`app/services/form_schema.py`, `app/services/workflow.py`) and enforced
+    on every request that uses the category — a definition here is a
+    contract, not documentation."""
 
     __tablename__ = "resource_categories"
 
@@ -27,6 +32,8 @@ class ResourceCategory(Base, UUIDPkMixin, TenantMixin, TimestampMixin):
     description: Mapped[str | None] = mapped_column(Text)
     unit: Mapped[str] = mapped_column(String(50), default="unit", nullable=False)
     form_schema: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB)
+    # {"initial": ..., "transitions": {...}} — null means the platform default
+    workflow: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     items: Mapped[list["InventoryItem"]] = relationship(

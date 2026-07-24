@@ -45,3 +45,29 @@ class VolunteerProfileRead(BaseModel):
     skills: list[str]
     is_active: bool
     created_at: datetime
+
+
+class VolunteerDirectoryEntry(BaseModel):
+    """What the web portal sees. Separate from VolunteerProfileRead so the
+    self-service and coordinator views can diverge without one leaking
+    fields into the other. `phone` is included deliberately: a coordinator
+    who dispatches a volunteer needs to be able to reach them."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    user_id: uuid.UUID
+    full_name: str
+    phone: str | None
+    base_district: str | None
+    city: str | None
+    available_status: bool
+    skills: list[str]
+    created_at: datetime
+
+
+class VolunteerDirectoryPage(BaseModel):
+    items: list[VolunteerDirectoryEntry]
+    total: int
+    limit: int
+    offset: int

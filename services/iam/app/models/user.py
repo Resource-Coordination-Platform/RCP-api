@@ -18,6 +18,8 @@ from app.db.base import SCHEMA, Base, TimestampMixin
 
 
 class UserType(str, enum.Enum):
+    # Platform operator (super admin console) — tenant_id must be NULL
+    SUPER_ADMIN = "SUPER_ADMIN"
     # Global pool (mobile app) — tenant_id must be NULL
     VOLUNTEER = "VOLUNTEER"
     VICTIM = "VICTIM"
@@ -31,8 +33,13 @@ class UserType(str, enum.Enum):
         return self in GLOBAL_USER_TYPES
 
 
+# SUPER_ADMIN is a platform-wide operator: like the mobile pool it carries no
+# tenant, but it is never self-registerable — it exists only through bootstrap
+# or promotion by an existing super admin. Kept out of GLOBAL_USER_TYPES so the
+# mobile registration path can never mint one.
 GLOBAL_USER_TYPES = frozenset({UserType.VOLUNTEER, UserType.VICTIM, UserType.DONATOR})
 TENANT_USER_TYPES = frozenset({UserType.TENANT_ADMIN, UserType.COORDINATOR})
+PLATFORM_USER_TYPES = frozenset({UserType.SUPER_ADMIN})
 
 
 class User(Base, TimestampMixin):

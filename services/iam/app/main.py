@@ -7,7 +7,7 @@ from rcp_common.logging import configure_logging
 from rcp_common.middleware import RequestContextMiddleware
 from rcp_common.metrics import render_prometheus_metrics
 
-from app.api import routes_auth, routes_jwks
+from app.api import routes_admin, routes_auth, routes_jwks
 from app.core.config import settings
 from app.core.keys import get_key_manager
 from app.db.database import engine
@@ -33,6 +33,7 @@ app.state.service_name = settings.SERVICE_NAME
 app.add_middleware(RequestContextMiddleware)
 
 app.include_router(routes_auth.router)
+app.include_router(routes_admin.router)
 app.include_router(routes_jwks.router)
 
 
