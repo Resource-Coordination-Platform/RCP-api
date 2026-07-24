@@ -124,7 +124,10 @@ def _handle(envelope: dict) -> None:
         if db.get(ProcessedEvent, event_id) is not None:
             return
 
-        if event_type == "logistics.resource-category.created":
+        if event_type in (
+            "logistics.resource-category.created",
+            "logistics.resource-category.updated",
+        ):
             _upsert_category(db, data, tenant_id)
         elif event_type == "logistics.inventory.item-updated":
             _upsert_inventory(db, data, tenant_id)

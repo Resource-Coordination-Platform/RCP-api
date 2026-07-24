@@ -69,14 +69,18 @@ def assign_task(
     if request.status not in (RequestStatus.APPROVED, RequestStatus.IN_PROGRESS):
         raise ValueError("Request must be approved before dispatching a volunteer")
 
-    volunteer_profile = db.scalars(
-        select(VolunteerProfile).where(
-            VolunteerProfile.user_id == data.volunteer_user_id,
-            VolunteerProfile.tenant_id == principal.tenant_id,
-        )
-    ).one_or_none()
-    if volunteer_profile is None:
-        raise ValueError("Volunteer not found")
+    # Volunteer identity and operational state are owned by the volunteer
+    # service (global actors); this service cannot authoritatively validate
+    # the reference, so it only rejects what it *knows* is wrong — a
+    # replicated user who is deactivated or isn't a volunteer. An absent
+    # replica is accepted: the coordinator picked the volunteer from the
+    # volunteer-service directory, and the replica may still be in flight.
+    volunteer_replica = db.get(UserReplica, data.volunteer_user_id)
+    if volunteer_replica is not None:
+        if not volunteer_replica.is_active:
+            raise ValueError("Volunteer is deactivated")
+        if "volunteer" not in volunteer_replica.roles:
+            raise ValueError("User is not a volunteer")
 
     task = DispatchTask(
         tenant_id=principal.tenant_id,
@@ -87,7 +91,6 @@ def assign_task(
     db.add(task)
     db.flush()
 
-    volunteer_replica = db.get(UserReplica, data.volunteer_user_id)
     assigner_replica = db.get(UserReplica, principal.user_id)
     emit(
         db,

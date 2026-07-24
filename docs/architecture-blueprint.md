@@ -32,9 +32,9 @@ The core business-domain service: everything a coordinator does.
 
 | Owns | Details |
 |---|---|
-| Resource categories | The **customizable workflow engine** — admin-defined categories with JSONB form schemas |
+| Resource categories | The **customizable workflow engine** — admin-defined categories carrying a JSONB form definition *and* a JSONB approval flow, both validated on write and enforced on every request (`app/services/form_schema.py`, `app/services/workflow.py`) |
 | Inventory | Donated-goods stock, atomic reservation (`SELECT … FOR UPDATE`), expiry tracking |
-| Help requests | Full lifecycle state machine: `pending → verified → approved → in_progress → fulfilled` |
+| Help requests | Lifecycle state machine, per category. Platform default: `pending → verified → approved → in_progress → fulfilled`; a category may define its own subset/ordering of those states |
 | Offers | Donation pledges that convert into inventory on receipt |
 | Volunteer operational profiles | Skills, availability, coarse location (identity itself lives in IAM — see §3.3) |
 | Dispatch | Task assignment to volunteers; matching by skill/area |
@@ -42,6 +42,7 @@ The core business-domain service: everything a coordinator does.
 
 **Publishes:** `logistics.task.assigned`, `logistics.task.status-changed`,
 `logistics.request.submitted`, `logistics.request.status-changed`,
+`logistics.resource-category.created`, `logistics.resource-category.updated`,
 `logistics.inventory.low-stock`, `logistics.offer.status-changed`
 **Consumes:** `iam.user.*`, `iam.tenant.*` (to maintain its local user replica, §3.3).
 
@@ -343,7 +344,9 @@ outbox         (see §4.5)
 ```sql
 user_replicas       (user_id PK, tenant_id, full_name, phone, roles TEXT[],
                      is_active, source_updated_at, synced_at)      -- ★ no FK anywhere
-resource_categories (id PK, tenant_id, name, unit, form_schema JSONB, is_active, ...)
+resource_categories (id PK, tenant_id, name, unit, form_schema JSONB,
+                     workflow JSONB,             -- NULL = platform default flow
+                     is_active, ...)             -- retirement is a soft delete
 inventory_items     (id PK, tenant_id, category_id → resource_categories.id,
                      name, quantity_total, quantity_reserved, status, expiry_date, ...)
 help_requests       (id PK, tenant_id, category_id → resource_categories.id,

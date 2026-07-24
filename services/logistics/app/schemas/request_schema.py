@@ -31,6 +31,9 @@ class HelpRequestRead(BaseModel):
     quantity_needed: int
     urgency: UrgencyLevel
     status: RequestStatus
+    # the category's admin-defined intake answers — without these the
+    # customizable form is write-only and coordinators cannot triage on it
+    extra_fields: dict[str, Any] | None
     area: str | None
     is_sensitive: bool
     created_at: datetime

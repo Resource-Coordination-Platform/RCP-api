@@ -13,13 +13,18 @@ from app.services import dispatch as dispatch_service
 router = APIRouter(prefix="/api/volunteers", tags=["volunteers"])
 
 
-@router.get("/available")
+@router.get("/available", deprecated=True)
 def find_volunteers(
     skill: str | None = None,
     area: str | None = None,
     db: Session = Depends(get_db),
     principal: Principal = Depends(require_roles("tenant_admin", "coordinator")),
 ):
+    """DEPRECATED — reads schema_logistics.volunteer_profiles, which has no
+    writer: volunteers are global actors owned by the volunteer service, so
+    this always returns []. Clients must use GET /api/volunteer/directory.
+    Kept only so existing callers get an empty list rather than a 404.
+    """
     return dispatch_service.find_available_volunteers(
         db, principal.tenant_id, skill=skill, area=area
     )

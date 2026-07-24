@@ -1,6 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from rcp_common.exceptions import ConflictError, NotFoundError
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_principal, require_roles
@@ -13,6 +14,7 @@ from app.schemas.request_schema import (
     HelpRequestStatusUpdate,
 )
 from app.services import requests as request_service
+from app.services.form_schema import FormValidationError
 
 router = APIRouter(prefix="/api/requests", tags=["requests"])
 
@@ -23,7 +25,18 @@ def submit_request(
     db: Session = Depends(get_db),
     principal: Principal = Depends(get_principal),
 ):
-    return request_service.create_request(db, principal, data)
+    try:
+        return request_service.create_request(db, principal, data)
+    except NotFoundError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc))
+    except ConflictError as exc:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(exc))
+    except FormValidationError as exc:
+        # per-field detail so the admin-defined form can highlight the inputs
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            {"message": "extra_fields does not match the category form", "errors": exc.errors},
+        )
 
 
 @router.get("", response_model=list[HelpRequestRead])

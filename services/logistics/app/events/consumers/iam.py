@@ -34,7 +34,7 @@ def _already_processed(db: Session, event_id: uuid.UUID) -> bool:
     return db.get(ProcessedEvent, event_id) is not None
 
 
-def _upsert_replica(db: Session, tenant_id: uuid.UUID, data: dict) -> None:
+def _upsert_replica(db: Session, tenant_id: uuid.UUID | None, data: dict) -> None:
     source_updated_at = datetime.fromisoformat(data["updated_at"])
     replica = db.get(UserReplica, uuid.UUID(data["user_id"]))
     if replica is None:
@@ -67,7 +67,12 @@ def _deactivate_replica(db: Session, data: dict) -> None:
 def _handle(envelope: dict) -> None:
     event_id = uuid.UUID(envelope["event_id"])
     event_type = envelope["event_type"]
-    tenant_id = uuid.UUID(envelope["tenant_id"])
+    # Global actors (VOLUNTEER/VICTIM/DONATOR) register with no tenant, so
+    # the envelope carries tenant_id: null. Coercing that unconditionally
+    # used to raise and dead-letter every mobile registration — which is
+    # why volunteers never appeared in this service at all.
+    raw_tenant = envelope.get("tenant_id")
+    tenant_id = uuid.UUID(raw_tenant) if raw_tenant else None
     data = envelope["data"]
 
     with SessionLocal() as db:

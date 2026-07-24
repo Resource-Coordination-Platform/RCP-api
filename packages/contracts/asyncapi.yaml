@@ -62,6 +62,12 @@ channels:
       resourceCategoryCreated:
         payload:
           $ref: "./events/logistics/resource-category-created.v1.schema.json"
+  logistics.resource-category.updated:
+    address: logistics.resource-category.updated
+    messages:
+      resourceCategoryUpdated:
+        payload:
+          $ref: "./events/logistics/resource-category-updated.v1.schema.json"
   logistics.inventory.item-updated:
     address: logistics.inventory.item-updated
     messages:
