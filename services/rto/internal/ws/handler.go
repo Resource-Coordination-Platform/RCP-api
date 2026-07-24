@@ -39,14 +39,41 @@ func newUpgrader(allowedOrigins []string) websocket.Upgrader {
 // tokenFromSubprotocol extracts the JWT from Sec-WebSocket-Protocol:
 // the client requests protocols ["bearer", "<jwt>"]. The token never
 // appears in the URL, so it can't leak into proxy or access logs.
+// func tokenFromSubprotocol(r *http.Request) string {
+// 	header := r.Header.Get("Sec-WebSocket-Protocol")
+// 	parts := strings.Split(header, ",")
+// 	if len(parts) >= 2 && strings.TrimSpace(parts[0]) == "bearer" {
+// 		return strings.TrimSpace(parts[1])
+// 	}
+// 	return ""
+// }
+
+
+
+
 func tokenFromSubprotocol(r *http.Request) string {
-	header := r.Header.Get("Sec-WebSocket-Protocol")
-	parts := strings.Split(header, ",")
-	if len(parts) >= 2 && strings.TrimSpace(parts[0]) == "bearer" {
-		return strings.TrimSpace(parts[1])
-	}
-	return ""
+    // ඔක්කොම Sec-WebSocket-Protocol headers අරගන්නවා
+    protocols := r.Header["Sec-WebSocket-Protocol"]
+    
+    for _, p := range protocols {
+        parts := strings.Split(p, ",")
+        for _, part := range parts {
+            s := strings.TrimSpace(part)
+            if strings.HasPrefix(s, "bearer") {
+                // "bearer <token>" වගේ තියෙනවා නම් ඒක වෙන් කරගන්නවා
+                tokenParts := strings.Split(s, " ")
+                if len(tokenParts) == 2 {
+                    return tokenParts[1]
+                }
+                // සමහරවිට "bearer,<token>" වගේ නම්
+                return strings.TrimPrefix(s, "bearer")
+            }
+        }
+    }
+    return ""
 }
+
+
 
 func Handler(hub *Hub, verifier *auth.Verifier, st *store.Store, allowedOrigins []string) http.HandlerFunc {
 	upgrader := newUpgrader(allowedOrigins)

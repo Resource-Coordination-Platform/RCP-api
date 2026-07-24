@@ -160,10 +160,23 @@ func (v *Verifier) Verify(tokenString string) (*Claims, error) {
 	if err != nil {
 		return nil, errors.New("invalid sub claim")
 	}
-	tenantID, err := uuid.Parse(tenant)
-	if err != nil {
-		return nil, errors.New("invalid tenant_id claim")
+	// tenantID, err := uuid.Parse(tenant)
+	// if err != nil {
+	// 	return nil, errors.New("invalid tenant_id claim")
+	// }
+	
+	var tenantID uuid.UUID
+	if tenant != "" {
+		tenantID, err = uuid.Parse(tenant)
+		if err != nil {
+			return nil, errors.New("invalid tenant_id claim")
+		}
+	} else {
+		// Global Users (Volunteers) ලා සඳහා හිස් UUID එකක් පාවිච්චි කරනවා
+		tenantID = uuid.Nil 
 	}
+
+
 
 	claims := &Claims{UserID: userID, TenantID: tenantID}
 	if jti, ok := mc["jti"].(string); ok {
