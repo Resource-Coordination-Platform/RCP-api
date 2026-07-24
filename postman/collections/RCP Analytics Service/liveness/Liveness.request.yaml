@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseUrl}}/liveness"
+method: GET
+headers:
+  Accept: application/json
+examples: ./.resources/Liveness.resources/examples
+order: 1000

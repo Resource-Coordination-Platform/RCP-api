@@ -1,0 +1,9 @@
+$kind: http-request
+name: Mark En Route
+description: Mark the volunteer as en route to the assignment location.
+url: '{{gatewayUrl}}/api/volunteer/assignments/{{assignmentId}}/en-route'
+method: POST
+headers:
+  - key: Accept
+    value: application/json
+order: 4000

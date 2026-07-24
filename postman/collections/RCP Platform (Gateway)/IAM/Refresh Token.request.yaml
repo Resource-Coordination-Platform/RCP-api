@@ -1,0 +1,19 @@
+$kind: http-request
+name: Refresh Token
+description: Exchange a refresh token for a new access/refresh token pair.
+url: '{{gatewayUrl}}/api/auth/refresh'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+body:
+  type: json
+  content: |-
+    {
+      "refresh_token": "{{refreshToken}}"
+    }
+order: 5000

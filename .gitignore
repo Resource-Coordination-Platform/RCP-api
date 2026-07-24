@@ -3,7 +3,7 @@ __pycache__/
 .venv/
 venv/
 *.egg-info/
-.env
 *.tfstate*
 .terraform/
 infra/compose/secrets/*.pem
+k8s*

@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseUrl}}/metrics"
+method: GET
+headers:
+  Accept: application/json
+examples: ./.resources/Metrics.resources/examples
+order: 1000

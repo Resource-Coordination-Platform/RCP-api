@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/requests/:request_id/status"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: application/json
+pathVariables:
+  request_id: f4451e9a-aaf4-1f91-7950-aa548610168e
+body:
+  type: json
+  content: |-
+    {
+      "status": "in_progress"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Update Status.resources/examples
+order: 1000

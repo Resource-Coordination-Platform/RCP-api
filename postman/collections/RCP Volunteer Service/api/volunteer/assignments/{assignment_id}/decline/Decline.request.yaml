@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/volunteer/assignments/:assignment_id/decline"
+method: POST
+headers:
+  Accept: application/json
+pathVariables:
+  assignment_id: ec196ca7-4e60-e01c-ecdd-f21e54d4cf49
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Decline.resources/examples
+order: 1000

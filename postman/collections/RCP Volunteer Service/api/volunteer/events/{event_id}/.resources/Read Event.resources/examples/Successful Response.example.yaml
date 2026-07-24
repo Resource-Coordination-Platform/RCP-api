@@ -1,0 +1,51 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/volunteer/events/:event_id"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    event_id: 74d97a52-704c-fbf8-c761-84709815af07
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "id": "871c04ce-309b-9473-2423-7baea0bd2107",
+        "tenant_id": "76e0cdd6-602a-7f89-c438-56a2d862c128",
+        "title": "string",
+        "description": "string",
+        "source_district": "string",
+        "broadcast_type": "RADIUS_L2",
+        "target_districts": [
+          "string",
+          "string"
+        ],
+        "status": "DECLARED",
+        "requirements": [
+          {
+            "id": "35655224-97b2-3c61-dae5-2cda489e6a0f",
+            "skill": "string",
+            "required_count": 4645,
+            "filled_count": 4785,
+            "status": "FULFILLED"
+          },
+          {
+            "id": "8de10b3a-7d14-c866-cb2a-4120ad78a887",
+            "skill": "string",
+            "required_count": 6486,
+            "filled_count": 7457,
+            "status": "OPEN"
+          }
+        ],
+        "created_at": "1997-12-13T07:45:03.910Z"
+      }
+order: 1000

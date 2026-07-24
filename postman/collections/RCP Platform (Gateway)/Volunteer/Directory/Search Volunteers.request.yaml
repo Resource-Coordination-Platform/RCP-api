@@ -1,0 +1,34 @@
+$kind: http-request
+name: Search Volunteers
+description: >-
+  Portal-facing volunteer directory (tenant_admin / coordinator). Filters the
+  global volunteer pool the matching engine draws from. Replaces the deprecated
+  logistics GET /api/volunteers/available.
+url: '{{gatewayUrl}}/api/volunteer/directory'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+queryParams:
+  - key: q
+    value: ''
+    disabled: true
+  - key: skill
+    value: first_aid
+    disabled: true
+  - key: district
+    value: Colombo
+    disabled: true
+  - key: city
+    value: ''
+    disabled: true
+  - key: available_only
+    value: 'true'
+    disabled: true
+  - key: limit
+    value: '50'
+    disabled: true
+  - key: offset
+    value: '0'
+    disabled: true
+order: 1000

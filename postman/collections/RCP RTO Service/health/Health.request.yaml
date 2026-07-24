@@ -1,0 +1,11 @@
+$kind: http-request
+name: Health
+description: RTO service health check.
+url: '{{rtoUrl}}/health'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+order: 1000

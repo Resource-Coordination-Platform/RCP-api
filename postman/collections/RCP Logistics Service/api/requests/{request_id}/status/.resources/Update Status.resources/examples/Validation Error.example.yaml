@@ -1,0 +1,53 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/requests/:request_id/status"
+  method: PATCH
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    request_id: f4451e9a-aaf4-1f91-7950-aa548610168e
+  body:
+    type: json
+    content: |-
+      {
+        "status": "in_progress"
+      }
+response:
+  statusCode: 422
+  statusText: Unprocessable Entity (WebDAV) (RFC 4918)
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "detail": [
+          {
+            "loc": [
+              "string",
+              4696
+            ],
+            "msg": "string",
+            "type": "string",
+            "input": "",
+            "ctx": {}
+          },
+          {
+            "loc": [
+              4327,
+              "string"
+            ],
+            "msg": "string",
+            "type": "string",
+            "input": "",
+            "ctx": {}
+          }
+        ]
+      }
+order: 2000

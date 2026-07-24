@@ -1,0 +1,17 @@
+$kind: websocket-request
+name: WebSocket Connect
+description: |-
+  Real-time WebSocket connection to the RTO service.
+
+  Authentication: JWT is passed via the Sec-WebSocket-Protocol header
+  as "bearer, <token>" — it never appears in the URL.
+
+  The server echoes back "bearer" as the accepted subprotocol per RFC 6455.
+
+  Once connected, the client receives real-time push events for the
+  tenant's disaster events and volunteer assignment updates.
+url: 'ws://localhost:8080/ws'
+headers:
+  - key: Sec-WebSocket-Protocol
+    value: 'bearer, {{bearerToken}}'
+order: 1000

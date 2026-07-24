@@ -1,0 +1,11 @@
+$kind: http-request
+name: Metrics
+description: Prometheus metrics endpoint.
+url: '{{rtoUrl}}/metrics'
+method: GET
+headers:
+  - key: Accept
+    value: 'text/plain'
+auth:
+  type: noauth
+order: 1000

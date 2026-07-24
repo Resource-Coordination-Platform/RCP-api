@@ -1,0 +1,14 @@
+$kind: http-request
+description: Close a disaster event, marking it as no longer active.
+url: '{{baseUrl}}/api/volunteer/events/:event_id/close'
+method: POST
+headers:
+  Accept: application/json
+pathVariables:
+  event_id: 74d97a52-704c-fbf8-c761-84709815af07
+auth:
+  type: bearer
+  credentials:
+    token: '{{bearerToken}}'
+examples: ./.resources/Close Event.resources/examples
+order: 2000

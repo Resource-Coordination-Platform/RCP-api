@@ -1,0 +1,39 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/volunteer/assignments"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      [
+        {
+          "id": "9770215e-25b3-d715-1400-ed625867fdcd",
+          "event_id": "d30ea05d-4194-aac8-d925-52c9825334a2",
+          "requirement_id": "4f28cb2b-2b73-617b-4cac-c0c0cbb7b4d2",
+          "volunteer_id": "39235677-1cb6-4d0c-2128-9522184c325d",
+          "status": "COMPLETED",
+          "responded_at": "1991-03-02T17:49:22.749Z",
+          "created_at": "2011-12-04T22:24:41.507Z"
+        },
+        {
+          "id": "7e54595a-d34a-fd8b-f4d0-694d04f846a6",
+          "event_id": "d8776568-ed90-0649-8199-fe53d7fd812b",
+          "requirement_id": "c7719a9d-8f86-bbff-1e2e-fdbe9df6fd59",
+          "volunteer_id": "fe08aa27-a7a9-63c7-51b2-4c9c8aca6a2b",
+          "status": "ACCEPTED",
+          "responded_at": "2016-08-30T20:30:39.583Z",
+          "created_at": "1956-09-07T11:17:18.082Z"
+        }
+      ]
+order: 1000

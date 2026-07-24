@@ -1,0 +1,9 @@
+$kind: http-request
+name: Close Event
+description: Close a disaster event.
+url: '{{gatewayUrl}}/api/volunteer/events/{{eventId}}/close'
+method: POST
+headers:
+  - key: Accept
+    value: application/json
+order: 6000

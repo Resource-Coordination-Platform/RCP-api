@@ -1,0 +1,20 @@
+$kind: http-request
+name: Onboard Tenant
+url: "{{baseUrl}}/api/auth/tenants"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Disaster Relief Operations",
+      "slug": "dro-lk",
+      "admin_email": "admin@dro.lk",
+      "admin_password": "AdminPassword@123",
+      "admin_full_name": "Main System Admin",
+      "description": "Central logistics and volunteer coordination unit"
+    }
+examples: ./.resources/Onboard Tenant.resources/examples
+order: 2000

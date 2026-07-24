@@ -1,0 +1,11 @@
+$kind: http-request
+name: Services Health
+description: Fan-out health check across all microservices.
+url: '{{gatewayUrl}}/health/services'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+order: 3000

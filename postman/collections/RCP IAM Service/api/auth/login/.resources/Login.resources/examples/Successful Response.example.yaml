@@ -1,0 +1,30 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/auth/login"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "email": "WIA554CI@NGtbh.hcqz",
+        "password": "string",
+        "tenant_slug": "string"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "access_token": "string",
+        "refresh_token": "string",
+        "expires_in": 3962,
+        "token_type": "bearer"
+      }
+order: 1000

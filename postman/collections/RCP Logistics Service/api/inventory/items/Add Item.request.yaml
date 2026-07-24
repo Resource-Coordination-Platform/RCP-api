@@ -1,0 +1,24 @@
+$kind: http-request
+name: Add Item
+url: "{{baseUrl}}/api/inventory/items"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "category_id": "47f81f8b-d64d-43d2-bb57-0581575e0426",
+      "name": "White Sugar",
+      "quantity_total": 150,
+      "expiry_date": "2027-05-20",
+      "storage_location": "Main Warehouse, Colombo",
+      "donor_name": "Red Cross"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Add Item.resources/examples
+order: 3000

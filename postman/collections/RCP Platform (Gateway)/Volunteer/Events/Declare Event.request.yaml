@@ -1,0 +1,22 @@
+$kind: http-request
+name: Declare Event
+description: Declare a disaster event. Matching fan-out happens asynchronously.
+url: "{{gatewayUrl}}/api/volunteer/events"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Flood response - Kalutara",
+      "description": "Urgent evacuation and first-aid support needed",
+      "source_district": "Kalutara",
+      "broadcast_type": "RADIUS_L1",
+      "requirements": [
+        { "skill": "first_aid", "required_count": 5 },
+        { "skill": "boat_operation", "required_count": 2 }
+      ]
+    }
+order: 2000

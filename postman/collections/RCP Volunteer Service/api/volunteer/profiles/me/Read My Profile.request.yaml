@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/volunteer/profiles/me"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Read My Profile.resources/examples
+order: 2000

@@ -1,0 +1,21 @@
+$kind: http-request
+description: |-
+  Toggle the volunteer's availability status. Requires base_district to be
+  set before going available.
+url: '{{baseUrl}}/api/volunteer/profiles/me/availability'
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "available_status": true
+    }
+auth:
+  type: bearer
+  credentials:
+    token: '{{bearerToken}}'
+examples: ./.resources/Set Availability.resources/examples
+order: 1000

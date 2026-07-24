@@ -1,0 +1,12 @@
+$kind: http-request
+name: Find Volunteers
+url: "{{baseUrl}}/api/volunteers/available"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Find Volunteers.resources/examples
+order: 1000

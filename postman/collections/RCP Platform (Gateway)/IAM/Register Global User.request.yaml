@@ -1,0 +1,23 @@
+$kind: http-request
+name: Register Global User
+description: Mobile-app signup for global pool actors (VOLUNTEER, VICTIM, DONATOR).
+url: '{{gatewayUrl}}/api/auth/register'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+body:
+  type: json
+  content: |-
+    {
+      "email": "volunteer@example.com",
+      "password": "securepass123",
+      "full_name": "Jane Volunteer",
+      "phone": "+94771234567",
+      "user_type": "VOLUNTEER"
+    }
+order: 2000

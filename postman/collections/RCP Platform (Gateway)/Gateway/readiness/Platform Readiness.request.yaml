@@ -1,0 +1,11 @@
+$kind: http-request
+name: Platform Readiness
+description: Aggregated readiness — checks all downstream services.
+url: '{{gatewayUrl}}/readiness'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+auth:
+  type: noauth
+order: 2000

@@ -1,0 +1,14 @@
+$kind: http-request
+description: Decline a volunteer assignment.
+url: '{{baseUrl}}/api/volunteer/assignments/:assignment_id/decline'
+method: POST
+headers:
+  Accept: application/json
+pathVariables:
+  assignment_id: 74d97a52-704c-fbf8-c761-84709815af07
+auth:
+  type: bearer
+  credentials:
+    token: '{{bearerToken}}'
+examples: ./.resources/Decline Assignment.resources/examples
+order: 2000

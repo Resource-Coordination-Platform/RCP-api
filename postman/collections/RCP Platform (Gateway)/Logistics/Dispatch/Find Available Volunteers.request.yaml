@@ -1,0 +1,16 @@
+$kind: http-request
+name: Find Available Volunteers
+description: Find available volunteers, optionally filtered by skill and area.
+url: '{{gatewayUrl}}/api/volunteers/available'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+queryParams:
+  - key: skill
+    value: ''
+    disabled: true
+  - key: area
+    value: ''
+    disabled: true
+order: 1000

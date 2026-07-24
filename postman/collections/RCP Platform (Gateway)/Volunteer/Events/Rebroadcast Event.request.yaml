@@ -1,0 +1,9 @@
+$kind: http-request
+name: Rebroadcast Event
+description: Re-run volunteer matching for still-open skill buckets.
+url: '{{gatewayUrl}}/api/volunteer/events/{{eventId}}/rebroadcast'
+method: POST
+headers:
+  - key: Accept
+    value: application/json
+order: 5000

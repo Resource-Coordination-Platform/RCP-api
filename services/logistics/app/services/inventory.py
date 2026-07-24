@@ -2,15 +2,32 @@
 
 import uuid
 
+from rcp_common.exceptions import NotFoundError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth import Principal
 from app.events.publisher import emit
 from app.models import InventoryItem, InventoryStatus, ResourceCategory
-from app.schemas.resource_schema import InventoryItemCreate, ResourceCategoryCreate
+from app.schemas.resource_schema import (
+    InventoryItemCreate,
+    ResourceCategoryCreate,
+    ResourceCategoryUpdate,
+)
 
 LOW_STOCK_THRESHOLD = 5
+
+
+def _category_event(category: ResourceCategory) -> dict:
+    now = category.updated_at or category.created_at
+    return {
+        "category_id": str(category.id),
+        "name": category.name,
+        "description": category.description,
+        "unit": category.unit,
+        "is_active": category.is_active,
+        "updated_at": now.isoformat() if now else None,
+    }
 
 
 def create_category(
@@ -19,36 +36,87 @@ def create_category(
     category = ResourceCategory(tenant_id=tenant_id, **data.model_dump())
     db.add(category)
     db.flush()
-    now = category.created_at
     emit(
         db,
         routing_key="logistics.resource-category.created",
         tenant_id=tenant_id,
-        data={
-            "category_id": str(category.id),
-            "name": category.name,
-            "description": category.description,
-            "unit": category.unit,
-            "is_active": category.is_active,
-            "updated_at": now.isoformat() if now else None,
-        },
+        data=_category_event(category),
     )
     db.commit()
     db.refresh(category)
     return category
 
 
-def list_categories(db: Session, tenant_id: uuid.UUID) -> list[ResourceCategory]:
-    return list(
-        db.scalars(
-            select(ResourceCategory)
-            .where(
-                ResourceCategory.tenant_id == tenant_id,
-                ResourceCategory.is_active.is_(True),
-            )
-            .order_by(ResourceCategory.name)
-        )
+def list_categories(
+    db: Session, tenant_id: uuid.UUID, include_inactive: bool = False
+) -> list[ResourceCategory]:
+    stmt = (
+        select(ResourceCategory)
+        .where(ResourceCategory.tenant_id == tenant_id)
+        .order_by(ResourceCategory.name)
     )
+    if not include_inactive:
+        stmt = stmt.where(ResourceCategory.is_active.is_(True))
+    return list(db.scalars(stmt))
+
+
+def get_category(
+    db: Session, tenant_id: uuid.UUID, category_id: uuid.UUID
+) -> ResourceCategory:
+    category = db.scalars(
+        select(ResourceCategory).where(
+            ResourceCategory.id == category_id,
+            ResourceCategory.tenant_id == tenant_id,
+        )
+    ).one_or_none()
+    if category is None:
+        raise NotFoundError("Resource category not found")
+    return category
+
+
+def update_category(
+    db: Session,
+    tenant_id: uuid.UUID,
+    category_id: uuid.UUID,
+    data: ResourceCategoryUpdate,
+) -> ResourceCategory:
+    """Partial update. Definitions were already validated by the schema
+    layer; requests submitted *before* the change keep the extra_fields they
+    were validated against — a redefinition is never applied retroactively."""
+    category = get_category(db, tenant_id, category_id)
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(category, field, value)
+    db.flush()
+    emit(
+        db,
+        routing_key="logistics.resource-category.updated",
+        tenant_id=tenant_id,
+        data=_category_event(category),
+    )
+    db.commit()
+    db.refresh(category)
+    return category
+
+
+def deactivate_category(
+    db: Session, tenant_id: uuid.UUID, category_id: uuid.UUID
+) -> ResourceCategory:
+    """Retire a category without destroying history: help requests reference
+    it with ON DELETE RESTRICT, and a fulfilled request must stay auditable,
+    so retirement is always a soft delete."""
+    category = get_category(db, tenant_id, category_id)
+    if category.is_active:
+        category.is_active = False
+        db.flush()
+        emit(
+            db,
+            routing_key="logistics.resource-category.updated",
+            tenant_id=tenant_id,
+            data=_category_event(category),
+        )
+        db.commit()
+        db.refresh(category)
+    return category
 
 
 def add_inventory_item(

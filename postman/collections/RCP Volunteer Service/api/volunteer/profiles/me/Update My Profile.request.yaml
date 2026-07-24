@@ -1,0 +1,25 @@
+$kind: http-request
+name: Update My Profile
+url: "{{baseUrl}}/api/volunteer/profiles"
+method: PUT
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "base_district": "Colombo",
+      "city": "Colombo",
+      "available_status": true,
+      "skills": [
+        "First Aid",
+        "Driving"
+      ]
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Update My Profile.resources/examples
+order: 3000

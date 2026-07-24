@@ -1,0 +1,54 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/volunteers/tasks"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "request_id": "dc765fc0-cf0f-efb6-840a-507c5da6cd3f",
+        "volunteer_user_id": "9df3e9a2-d641-86a5-ced5-b154b7cb6856",
+        "title": "string",
+        "instructions": null
+      }
+response:
+  statusCode: 422
+  statusText: Unprocessable Entity (WebDAV) (RFC 4918)
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "detail": [
+          {
+            "loc": [
+              "string",
+              4696
+            ],
+            "msg": "string",
+            "type": "string",
+            "input": "",
+            "ctx": {}
+          },
+          {
+            "loc": [
+              4327,
+              "string"
+            ],
+            "msg": "string",
+            "type": "string",
+            "input": "",
+            "ctx": {}
+          }
+        ]
+      }
+order: 2000

@@ -1,0 +1,45 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/volunteer/assignments/:assignment_id/complete"
+  method: POST
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    assignment_id: ec196ca7-4e60-e01c-ecdd-f21e54d4cf49
+response:
+  statusCode: 422
+  statusText: Unprocessable Entity (WebDAV) (RFC 4918)
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "detail": [
+          {
+            "loc": [
+              "string",
+              2116
+            ],
+            "msg": "string",
+            "type": "string",
+            "input": "",
+            "ctx": {}
+          },
+          {
+            "loc": [
+              "string",
+              1803
+            ],
+            "msg": "string",
+            "type": "string",
+            "input": "",
+            "ctx": {}
+          }
+        ]
+      }
+order: 2000

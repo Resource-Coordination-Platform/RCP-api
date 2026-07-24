@@ -1,0 +1,16 @@
+$kind: http-request
+description: |-
+  Re-run matching for still-open buckets (e.g. after volunteers
+  declined, or new volunteers became available).
+url: "{{baseUrl}}/api/volunteer/events/:event_id/rebroadcast"
+method: POST
+headers:
+  Accept: application/json
+pathVariables:
+  event_id: 74d97a52-704c-fbf8-c761-84709815af07
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Rebroadcast.resources/examples
+order: 1000

@@ -1,0 +1,45 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/inventory/items"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      [
+        {
+          "id": "d39a346f-f9dd-8fe0-7ef4-f77bd9a7ac85",
+          "category_id": "51d8f2bb-e8f3-3ab9-4ab4-050c5cc72d1c",
+          "name": "string",
+          "quantity_total": 2641,
+          "quantity_reserved": 8382,
+          "quantity_available": 9903,
+          "status": "available",
+          "expiry_date": "2008-06-03",
+          "storage_location": "string",
+          "created_at": "1962-12-06T09:27:56.809Z"
+        },
+        {
+          "id": "4924dcd8-49db-b2cb-5e0d-e1b97fd7d12c",
+          "category_id": "5df9ae54-e3f1-19ac-e9bb-4fc5e39b093c",
+          "name": "string",
+          "quantity_total": 9001,
+          "quantity_reserved": 1185,
+          "quantity_available": 7703,
+          "status": "reserved",
+          "expiry_date": "1948-01-25",
+          "storage_location": "string",
+          "created_at": "1994-02-10T23:53:40.686Z"
+        }
+      ]
+order: 1000

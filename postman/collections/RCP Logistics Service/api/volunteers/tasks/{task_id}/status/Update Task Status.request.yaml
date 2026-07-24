@@ -1,0 +1,17 @@
+$kind: http-request
+description: Update the status of a dispatch task. Accessible by the assigned volunteer or coordinators.
+url: '{{baseUrl}}/api/volunteers/tasks/:task_id/status'
+method: PATCH
+headers:
+  Accept: application/json
+pathVariables:
+  task_id: dc765fc0-cf0f-efb6-840a-507c5da6cd3f
+params:
+  - key: new_status
+    value: ACCEPTED
+auth:
+  type: bearer
+  credentials:
+    token: '{{bearerToken}}'
+examples: ./.resources/Update Task Status.resources/examples
+order: 1000

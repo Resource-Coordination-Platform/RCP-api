@@ -1,0 +1,12 @@
+$kind: http-request
+name: Reserve Item
+description: Reserve a quantity of an inventory item.
+url: '{{gatewayUrl}}/api/inventory/items/{{itemId}}/reserve'
+method: POST
+headers:
+  - key: Accept
+    value: application/json
+queryParams:
+  - key: quantity
+    value: '10'
+order: 5000

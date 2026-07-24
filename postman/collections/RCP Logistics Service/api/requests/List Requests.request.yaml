@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/requests?status_filter=approved&limit=50&offset=0"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  status_filter: approved
+  limit: "50"
+  offset: "0"
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/List Requests.resources/examples
+order: 3000

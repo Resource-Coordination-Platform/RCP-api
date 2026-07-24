@@ -1,0 +1,81 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/volunteer/events"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      [
+        {
+          "id": "a2f8b2d2-2733-9f90-1c16-4f4acec82e49",
+          "tenant_id": "67b81ab4-1323-99b0-1fef-6c8407e07f80",
+          "title": "string",
+          "description": "string",
+          "source_district": "string",
+          "broadcast_type": "RADIUS_L2",
+          "target_districts": [
+            "string",
+            "string"
+          ],
+          "status": "DECLARED",
+          "requirements": [
+            {
+              "id": "0aa38958-2ac1-ad2a-6c23-db1066f70cbc",
+              "skill": "string",
+              "required_count": 7284,
+              "filled_count": 624,
+              "status": "FULFILLED"
+            },
+            {
+              "id": "a3a23d40-3ffd-eaba-f8c9-785c7be92119",
+              "skill": "string",
+              "required_count": 1574,
+              "filled_count": 5289,
+              "status": "OPEN"
+            }
+          ],
+          "created_at": "1989-06-21T14:59:16.117Z"
+        },
+        {
+          "id": "0ff6ea6c-bd37-881b-44ac-cbe5af4cf660",
+          "tenant_id": "f0591ba9-4429-528b-5636-e5cb2ca400a0",
+          "title": "string",
+          "description": "string",
+          "source_district": "string",
+          "broadcast_type": "TARGETED",
+          "target_districts": [
+            "string",
+            "string"
+          ],
+          "status": "CLOSED",
+          "requirements": [
+            {
+              "id": "2fd7297c-6872-8008-b98e-be9f5c48b197",
+              "skill": "string",
+              "required_count": 1714,
+              "filled_count": 5558,
+              "status": "FULFILLED"
+            },
+            {
+              "id": "41e58b49-b030-d483-ef5a-8f1966c0c899",
+              "skill": "string",
+              "required_count": 5262,
+              "filled_count": 6380,
+              "status": "OPEN"
+            }
+          ],
+          "created_at": "1954-01-14T03:25:21.237Z"
+        }
+      ]
+order: 1000

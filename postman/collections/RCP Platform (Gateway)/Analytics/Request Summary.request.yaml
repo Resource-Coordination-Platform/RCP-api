@@ -1,0 +1,9 @@
+$kind: http-request
+name: Request Summary
+description: Summary of help request statuses (tenant_admin or coordinator).
+url: '{{gatewayUrl}}/api/reports/request-summary'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+order: 2000

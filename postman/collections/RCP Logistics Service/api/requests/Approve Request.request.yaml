@@ -1,0 +1,12 @@
+$kind: http-request
+name: Approve Request
+url: "{{baseUrl}}/api/requests/07b151c2-7641-47ef-8ca0-de50aaac9518/status"
+method: PATCH
+body:
+  type: json
+  content: "{\r\n  \"status\": \"approved\"\r\n}"
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+order: 4097007199268468

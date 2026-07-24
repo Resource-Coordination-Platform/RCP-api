@@ -1,0 +1,9 @@
+$kind: http-request
+name: Need vs Fulfillment
+description: Report comparing resource needs against fulfillment (tenant_admin or coordinator).
+url: '{{gatewayUrl}}/api/reports/need-vs-fulfillment'
+method: GET
+headers:
+  - key: Accept
+    value: application/json
+order: 1000

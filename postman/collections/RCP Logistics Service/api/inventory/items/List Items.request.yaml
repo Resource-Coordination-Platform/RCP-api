@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/inventory/items"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/List Items.resources/examples
+order: 2000

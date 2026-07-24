@@ -1,0 +1,52 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/inventory/categories"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      [
+        {
+          "id": "cc66c236-0e20-503f-4003-9fe286c5d340",
+          "name": "string",
+          "description": "string",
+          "unit": "string",
+          "form_schema": [
+            {
+              "key_0": 9877
+            },
+            {
+              "key_0": "string"
+            }
+          ],
+          "is_active": false
+        },
+        {
+          "id": "4ffac88e-7ef3-6274-95f8-68fc997ae59f",
+          "name": "string",
+          "description": "string",
+          "unit": "string",
+          "form_schema": [
+            {
+              "key_0": false,
+              "key_1": false
+            },
+            {
+              "key_0": false
+            }
+          ],
+          "is_active": false
+        }
+      ]
+order: 1000

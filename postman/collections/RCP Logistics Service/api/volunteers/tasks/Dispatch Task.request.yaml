@@ -1,0 +1,22 @@
+$kind: http-request
+name: Dispatch Task
+url: "{{baseUrl}}/api/volunteers/tasks"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "request_id": "07b151c2-7641-47ef-8ca0-de50aaac9518",
+      "volunteer_user_id": "56d82eb5-ef55-471d-a03c-f43ecd54ca45",
+      "title": "Deliver 10kg Samba Rice to Kamal",
+      "instructions": "Please collect 10kg of Samba Rice from the Main Warehouse, Colombo and deliver it to Kamal immediately."
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Dispatch Task.resources/examples
+order: 2000

@@ -1,0 +1,66 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/requests"
+  method: POST
+  headers:
+    - key: Content-Type
+      value: application/json
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  body:
+    type: json
+    content: |-
+      {
+        "category_id": "3ede9d98-2865-f1cb-ad44-2c11f6006085",
+        "description": "string",
+        "quantity_needed": 1,
+        "urgency": "critical",
+        "requester_name": "string",
+        "requester_phone": "string",
+        "area": null,
+        "latitude": 2445.233834498034,
+        "longitude": 1521.7622390676256,
+        "is_sensitive": false,
+        "extra_fields": {
+          "key_0": false,
+          "key_1": 5623.310684746942,
+          "key_2": false,
+          "key_3": 5295
+        }
+      }
+response:
+  statusCode: 422
+  statusText: Unprocessable Entity (WebDAV) (RFC 4918)
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "detail": [
+          {
+            "loc": [
+              "string",
+              4696
+            ],
+            "msg": "string",
+            "type": "string",
+            "input": "",
+            "ctx": {}
+          },
+          {
+            "loc": [
+              4327,
+              "string"
+            ],
+            "msg": "string",
+            "type": "string",
+            "input": "",
+            "ctx": {}
+          }
+        ]
+      }
+order: 2000

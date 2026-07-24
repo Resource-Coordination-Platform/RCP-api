@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/volunteers/tasks/:task_id/status?new_status=completed"
+method: PATCH
+headers:
+  Accept: application/json
+queryParams:
+  new_status: completed
+pathVariables:
+  task_id: 25c6647f-980f-65b6-b02c-77e7160bc6f3
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+examples: ./.resources/Update Task.resources/examples
+order: 1000

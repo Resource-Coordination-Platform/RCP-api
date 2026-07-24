@@ -1,29 +1,38 @@
-"""Help-request lifecycle: submit -> verify -> approve -> fulfil."""
+"""Help-request lifecycle. The steps are not fixed: each resource category
+carries its own form definition and approval flow (the customizable workflow
+engine), and both are enforced here — see app/services/form_schema.py and
+app/services/workflow.py."""
 
 import uuid
 from datetime import datetime, timezone
 
+from rcp_common.exceptions import ConflictError
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.auth import Principal
 from app.events.publisher import emit
-from app.models import HelpRequest, RequestStatus
+from app.models import HelpRequest, RequestStatus, ResourceCategory
 from app.schemas.request_schema import HelpRequestCreate
-
-_ALLOWED_TRANSITIONS: dict[RequestStatus, set[RequestStatus]] = {
-    RequestStatus.PENDING: {RequestStatus.VERIFIED, RequestStatus.REJECTED, RequestStatus.CANCELLED},
-    RequestStatus.VERIFIED: {RequestStatus.APPROVED, RequestStatus.REJECTED, RequestStatus.CANCELLED},
-    RequestStatus.APPROVED: {RequestStatus.IN_PROGRESS, RequestStatus.CANCELLED},
-    RequestStatus.IN_PROGRESS: {RequestStatus.FULFILLED, RequestStatus.CANCELLED},
-}
+from app.services import form_schema, workflow
+from app.services.inventory import get_category
 
 
 def create_request(db: Session, principal: Principal, data: HelpRequestCreate) -> HelpRequest:
+    category = get_category(db, principal.tenant_id, data.category_id)
+    if not category.is_active:
+        raise ConflictError(f"Resource category '{category.name}' is no longer accepting requests")
+
+    payload = data.model_dump()
+    payload["extra_fields"] = form_schema.validate_payload(
+        category.form_schema, payload.get("extra_fields")
+    )
+
     request = HelpRequest(
         tenant_id=principal.tenant_id,
         requester_user_id=principal.user_id,
-        **data.model_dump(),
+        status=workflow.initial_status(category.workflow),
+        **payload,
     )
     db.add(request)
     db.flush()
@@ -68,19 +77,22 @@ def list_requests(
 
 def get_request(db: Session, tenant_id: uuid.UUID, request_id: uuid.UUID) -> HelpRequest | None:
     return db.scalars(
-        select(HelpRequest).where(
-            HelpRequest.id == request_id, HelpRequest.tenant_id == tenant_id
-        )
+        select(HelpRequest)
+        .where(HelpRequest.id == request_id, HelpRequest.tenant_id == tenant_id)
+        .options(selectinload(HelpRequest.category))
     ).one_or_none()
 
 
 def change_status(
     db: Session, request: HelpRequest, new_status: RequestStatus, principal: Principal
 ) -> HelpRequest:
-    allowed = _ALLOWED_TRANSITIONS.get(request.status, set())
+    category: ResourceCategory | None = request.category
+    allowed = workflow.allowed_next(category.workflow if category else None, request.status)
     if new_status not in allowed:
+        options = sorted(status.value for status in allowed) or ["none — this state is final"]
         raise ValueError(
-            f"Cannot move request from {request.status.value} to {new_status.value}"
+            f"Cannot move request from {request.status.value} to {new_status.value}; "
+            f"this category allows: {', '.join(options)}"
         )
 
     old_status = request.status

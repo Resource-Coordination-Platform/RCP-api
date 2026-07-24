@@ -1,0 +1,20 @@
+$kind: http-request
+name: Create Category
+description: Create a resource category (tenant_admin only).
+url: '{{gatewayUrl}}/api/inventory/categories'
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Accept
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Medical Supplies",
+      "description": "First aid and medical equipment",
+      "unit": "box",
+      "form_schema": null
+    }
+order: 1000

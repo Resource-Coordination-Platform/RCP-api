@@ -1,0 +1,8 @@
+$kind: http-request
+description: The static geography clients build broadcast UIs from.
+url: "{{baseUrl}}/api/volunteer/events/districts"
+method: GET
+headers:
+  Accept: application/json
+examples: ./.resources/List Districts.resources/examples
+order: 1000
