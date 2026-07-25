@@ -13,6 +13,10 @@ from app.events.consumers.disaster import start_consumer as start_disaster_consu
 from app.events.consumers.iam import start_consumer as start_iam_consumer
 from app.events.relay import start_relay
 from app.models import Base
+# උඩින් imports තියෙන තැන මේක දාන්න:
+from app.api import routes_reports
+
+
 
 configure_logging(settings.SERVICE_NAME, settings.LOG_LEVEL)
 
@@ -41,7 +45,8 @@ app.include_router(routes_profiles.router)
 app.include_router(routes_directory.router)
 app.include_router(routes_events.router)
 app.include_router(routes_assignments.router)
-
+# පල්ලෙහා අනිත් routers තියෙන තැනට මේක එකතු කරන්න:
+app.include_router(routes_reports.router)
 
 def _database_ready() -> bool:
     try:
