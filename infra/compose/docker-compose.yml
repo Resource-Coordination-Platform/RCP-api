@@ -99,6 +99,7 @@ services:
     environment:
       <<: *common-env
       DATABASE_URL: ${LOGISTICS_DATABASE_URL}
+    ports: ["8002:8000"]  
     depends_on:
       db: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
