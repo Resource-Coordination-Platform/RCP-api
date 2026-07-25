@@ -10,6 +10,8 @@ from app.models.event import (
 )
 from app.models.outbox import Outbox, ProcessedEvent
 from app.models.volunteer import VolunteerProfile
+# volunteer/app/models/__init__.py එකේ අගට මේක දාන්න
+from app.models.report import VolunteerReport
 
 __all__ = [
     "Base",
@@ -23,4 +25,5 @@ __all__ = [
     "AssignmentStatus",
     "Outbox",
     "ProcessedEvent",
+    "VolunteerReport"
 ]
