@@ -6,6 +6,7 @@ from app.models.resource import InventoryItem, InventoryStatus, ResourceCategory
 from app.models.task import DispatchTask, TaskStatus
 from app.models.user_replica import UserReplica
 from app.models.volunteer import AvailabilityStatus, VolunteerProfile, VolunteerSkill
+from app.models.payment_donation import PaymentDonation, PaymentStatus
 
 __all__ = [
     "Base",
@@ -25,4 +26,6 @@ __all__ = [
     "AvailabilityStatus",
     "Outbox",
     "ProcessedEvent",
+    "PaymentDonation",  # <--- අලුතින් දැම්මේ
+    "PaymentStatus",    # <--- අලුතින් දැම්මේ
 ]
