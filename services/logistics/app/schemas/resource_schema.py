@@ -85,3 +85,15 @@ class InventoryItemRead(BaseModel):
     expiry_date: date | None
     storage_location: str | None
     created_at: datetime
+
+class DonationNeedRead(BaseModel):
+    id: uuid.UUID
+    tenant_id: uuid.UUID
+    name: str
+    category_name: str
+    unit: str
+    needed_quantity: int
+    urgency: str
+
+    class Config:
+        orm_mode = True
