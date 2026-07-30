@@ -13,8 +13,10 @@ from app.schemas.resource_schema import (
     ResourceCategoryCreate,
     ResourceCategoryRead,
     ResourceCategoryUpdate,
+    DonationNeedRead,
 )
 from app.services import inventory as inventory_service
+
 
 router = APIRouter(prefix="/api/inventory", tags=["inventory"])
 
@@ -106,3 +108,17 @@ def reserve(
         return inventory_service.reserve_stock(db, principal, item_id, quantity)
     except ValueError as exc:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc))
+
+
+
+
+
+
+@router.get("/needs", response_model=list[DonationNeedRead])
+def list_donation_needs(
+    db: Session = Depends(get_db),
+    # මෙතන තමයි වැදගත්ම කෑල්ල. Volunteer ට only මේක බලන්න පුළුවන් වෙන්න ඕනේ!
+    principal: Principal = Depends(require_roles("volunteer")),
+):
+    """Volunteer ට හිඟ බඩු (Shortages) බලාගන්න තියෙන Endpoint එක"""  #meka bn swagger ui eke penawana margopadeshaya yakow :)
+    return inventory_service.get_donation_needs(db)
