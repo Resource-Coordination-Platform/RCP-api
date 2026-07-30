@@ -4,6 +4,7 @@ import uuid
 from pydantic import BaseModel
 
 class PaymentCheckoutRequest(BaseModel):
+    tenant_id: uuid.UUID   # <--- මේක අලුතින් දාන්න
     category_id: uuid.UUID
     amount: float
     quantity: int
