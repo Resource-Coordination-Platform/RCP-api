@@ -17,4 +17,4 @@ def create_checkout(
     principal: Principal = Depends(require_roles("volunteer")),
 ):
     """App එකෙන් PayHere එකට යන්න ඕනේ කරන Hash එක හදලා දෙනවා"""
-    return payment_service.create_checkout_session(db, principal.tenant_id, principal.user_id, data)
+    return payment_service.create_checkout_session(db, data.tenant_id, principal.user_id, data)
