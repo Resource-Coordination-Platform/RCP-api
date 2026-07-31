@@ -240,3 +240,28 @@ def release_stock(
     db.commit()
     db.refresh(item)
     return item
+
+
+
+def get_donation_needs(db: Session):
+    # Available quantity එක 10 ට වඩා අඩු ඒව තමයි හිඟ බඩු (Shortages) විදිහට ගන්නේ
+    # Category එකත් එක්ක Join කරලා ගන්නවා Unit එකයි Name එකයි දැනගන්න
+    query = select(InventoryItem, ResourceCategory).join(
+        ResourceCategory, InventoryItem.category_id == ResourceCategory.id
+    ).where((InventoryItem.quantity_total - InventoryItem.quantity_reserved) < 10)
+
+    results = db.execute(query).all()
+
+    needs_list = []
+    for item, category in results:
+        available = item.quantity_total - item.quantity_reserved
+        needs_list.append({
+            "id": item.id,
+            "tenant_id": item.tenant_id,
+            "name": item.name,
+            "category_name": category.name,
+            "unit": category.unit,
+            "needed_quantity": 50 - available if available >= 0 else 50, # අඩුම 50ක් වත් (Target) ඕනේ කියලා පෙන්නනවා
+            "urgency": "CRITICAL" if available <= 0 else "HIGH"
+        })
+    return needs_list
