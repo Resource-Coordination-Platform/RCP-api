@@ -143,7 +143,8 @@ services:
       # iam:8001 කියන්නේ iam සර්විස් එකේ ඉන්ටර්නල් පෝට් එක newly addded
       JWT_JWKS_URL: http://iam:8000/.well-known/jwks.json
       # JWT_JWKS_URL: http://172.19.0.4:8000/.well-known/jwks.json
-      DATABASE_URL: ${RTO_DATABASE_URL}
+      DATABASE_URL: postgres://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres
+
       # extra_hosts:
       #   "iam:172.19.0.4"
 
