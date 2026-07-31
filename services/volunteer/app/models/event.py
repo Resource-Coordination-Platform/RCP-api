@@ -11,6 +11,7 @@ import enum
 import uuid
 from datetime import datetime
 
+
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
@@ -19,6 +20,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    Float,
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -83,6 +85,10 @@ class DisasterEvent(Base, UUIDPkMixin, TenantMixin, TimestampMixin):
     assignments: Mapped[list["EventVolunteerMapping"]] = relationship(
         back_populates="event", cascade="all, delete-orphan"
     )
+    
+    # 👇 මෙන්න මේ Location Columns දෙක අලුතින් එකතු කරන්න Map ekata
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
 
 
 class EventRequirement(Base, UUIDPkMixin, TimestampMixin):
