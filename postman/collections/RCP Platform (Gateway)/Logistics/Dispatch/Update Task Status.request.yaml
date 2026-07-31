@@ -1,12 +1,13 @@
 $kind: http-request
 name: Update Task Status
 description: Update the status of a dispatch task.
-url: '{{gatewayUrl}}/api/volunteers/tasks/{{taskId}}/status'
+url: "{{gatewayUrl}}/api/volunteers/tasks/{{taskId}}/status?new_status=accepted"
 method: PATCH
 headers:
-  - key: Accept
-    value: application/json
+  Accept: application/json
 queryParams:
   - key: new_status
-    value: ACCEPTED
+    value: accepted
+    disabled: false
+    description: ""
 order: 3000
