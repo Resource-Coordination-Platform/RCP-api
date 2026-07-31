@@ -44,6 +44,27 @@ def declare_event(
 
 
 
+@router.get("/active-map", response_model=list[DisasterEventRead])
+def get_active_events_for_map(
+    db: Session = Depends(get_db),
+    # 👇 Volunteer ට ඇක්සස් දෙන්න:
+    principal: Principal = Depends(require_roles("volunteer", "tenant_admin", "coordinator")),
+):
+    """Map එකේ පෙන්වන්න Location තියෙන Active Events ඔක්කොම ගන්නවා"""
+    events = db.scalars(
+        select(DisasterEvent)
+        .where(
+            DisasterEvent.status.in_([EventStatus.DECLARED, EventStatus.BROADCASTING]),
+            DisasterEvent.latitude.is_not(None),
+            DisasterEvent.longitude.is_not(None)
+        )
+        .options(selectinload(DisasterEvent.requirements))
+    ).all()
+    return list(events)
+
+
+
+
 # 1. Events ලිස්ට් එක ගන්න Endpoint eka
 @router.get("", response_model=list[DisasterEventRead])
 def list_events(
@@ -132,3 +153,7 @@ def close_event(
     db.commit()
     db.refresh(event)
     return event
+
+
+
+
