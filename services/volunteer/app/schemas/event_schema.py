@@ -26,6 +26,11 @@ class DisasterEventCreate(BaseModel):
     target_districts: list[str] | None = None
     requirements: list[RequirementCreate] = Field(min_length=1, max_length=50)
 
+
+    # 👇 අලුතින් එකතු කරන්න (Optional නිසා None default දාන්න):
+    latitude: float | None = None
+    longitude: float | None = None
+
     @field_validator("source_district")
     @classmethod
     def district_must_exist(cls, v: str) -> str:
@@ -68,6 +73,10 @@ class DisasterEventRead(BaseModel):
     status: EventStatus
     requirements: list[RequirementRead]
     created_at: datetime
+
+    # 👇 මෙතනටත් දාන්න එතකොට App එකට Response එකේ එනවා:
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 class AssignmentRead(BaseModel):
