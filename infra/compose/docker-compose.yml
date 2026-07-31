@@ -146,6 +146,8 @@ services:
       DATABASE_URL: ${RTO_DATABASE_URL}
       # extra_hosts:
       #   "iam:172.19.0.4"
+
+      
       
     ports: ["8080:8080"]
     depends_on:
