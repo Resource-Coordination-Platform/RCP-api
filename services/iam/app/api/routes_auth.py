@@ -11,10 +11,13 @@ from app.schemas.auth_schema import (
     TenantOnboard,
     TenantRead,
     TenantUserRegister,
+    TenantLocationRead,  #new added by Kesh
     TokenPair,
     UserRead,
 )
 from app.services import auth as auth_service 
+
+
 
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -95,3 +98,21 @@ def get_tenants(db: Session = Depends(get_db)):
     """මෙමඟින් සියලුම Tenants ලාගේ ලැයිස්තුව ලබාදේ."""
     # අපි කලින් auth.py එකේ ලියපු function එකට කතා කරනවා
     return auth_service.get_all_tenants(db)
+
+
+
+@router.get("/tenants/locations", response_model=list[TenantLocationRead])
+def list_tenant_locations(
+    db: Session = Depends(get_db),
+    
+):
+    """Map එකේ පෙන්වන්න Location තියෙන Active Tenants (සංවිධාන) ඔක්කොම ගන්නවා"""
+    tenants = db.scalars(
+        select(Tenant)
+        .where(
+            Tenant.status == "active",
+            Tenant.latitude.is_not(None),
+            Tenant.longitude.is_not(None)
+        )
+    ).all()
+    return list(tenants)
