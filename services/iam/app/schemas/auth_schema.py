@@ -84,3 +84,14 @@ class TokenPair(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
+
+ #added by kesh.this ude for get tenants/locations endpoint
+class TenantLocationRead(BaseModel):
+    id: uuid.UUID
+    name: str
+    description: str | None = None
+    latitude: float
+    longitude: float
+
+    class Config:
+        from_attributes = True

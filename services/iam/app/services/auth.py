@@ -205,8 +205,6 @@ def refresh(db: Session, raw_token: str) -> TokenPair | None:
 ####
 
 
-
-
 # Database එකෙන් සේරම Tenants ලව අරන් එන Function එක
 def get_all_tenants(db: Session):
     # 'Tenant' Table එකේ තියෙන සේරම rows ටික අරන් List එකක් විදිහට දෙනවා
