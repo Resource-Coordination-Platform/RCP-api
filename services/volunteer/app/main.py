@@ -6,15 +6,16 @@ from rcp_common.logging import configure_logging
 from rcp_common.metrics import render_prometheus_metrics
 from rcp_common.middleware import RequestContextMiddleware
 
-from app.api import routes_assignments, routes_directory, routes_events, routes_profiles
+from app.api import routes_assignments, routes_directory, routes_events, routes_profiles,routes_reports,routes_help_requests
+
 from app.core.config import settings
 from app.db.database import engine
 from app.events.consumers.disaster import start_consumer as start_disaster_consumer
 from app.events.consumers.iam import start_consumer as start_iam_consumer
 from app.events.relay import start_relay
 from app.models import Base
-# උඩින් imports තියෙන තැන මේක දාන්න:
-from app.api import routes_reports
+
+
 
 
 
@@ -45,7 +46,7 @@ app.include_router(routes_profiles.router)
 app.include_router(routes_directory.router)
 app.include_router(routes_events.router)
 app.include_router(routes_assignments.router)
-# පල්ලෙහා අනිත් routers තියෙන තැනට මේක එකතු කරන්න:
+app.include_router(routes_help_requests.router)
 app.include_router(routes_reports.router)
 
 def _database_ready() -> bool:
