@@ -10,14 +10,14 @@ from app.schemas.help_request_schema import VictimRequestCreate, VictimRequestRe
 
 router = APIRouter(prefix="/api/volunteer/requests", tags=["victim-requests"])
 
-_victim = require_roles("victim") # Victim ට විතරයි මේකට ඇතුළු විය හැක
+
 
 # 1. Victim ට අලුතින් Request එකක් දාන්න (App එකෙන් කතා කරන්නේ මේකට)
 @router.post("", response_model=VictimRequestRead, status_code=status.HTTP_201_CREATED)
 def create_help_request(
     data: VictimRequestCreate,
     db: Session = Depends(get_db),
-    principal: Principal = Depends(_victim), # Victim ට විතරයි මේකට ඇතුළු විය හැක
+    principal: Principal = Depends(require_roles("victim")), # Victim ට විතරයි මේකට ඇතුළු විය හැක
 ):
     new_request = VictimRequest(
         victim_id=principal.user_id, # Token එකෙන් එන User ID එක
@@ -44,3 +44,18 @@ def get_pending_requests(
     query = select(VictimRequest).where(VictimRequest.status == "PENDING").order_by(VictimRequest.created_at.desc())
     requests = db.scalars(query).all()
     return list(requests)
+
+
+# 3. ලොග් වෙලා ඉන්න Victim ට තමන්ගේ ඉල්ලීම් ටික බලාගන්න (App එකේ Home Screen එකෙන් කතා කරන්නේ මේකට)
+@router.get("/my-requests", response_model=list[VictimRequestRead])
+def get_my_requests(
+    db: Session = Depends(get_db),
+    principal: Principal = Depends(require_roles("victim")), # Victim ට විතරයි මේකට ඇතුළු විය හැක
+):
+    # Database එකෙන් හොයනවා ලොග් වෙලා ඉන්න User ගේ ID එකට සමාන victim_id තියෙන රෙකෝඩ්ස් ටික
+    query = select(VictimRequest).where(
+        VictimRequest.victim_id == principal.user_id
+    ).order_by(VictimRequest.created_at.desc())
+    
+    requests = db.scalars(query).all()
+    return list(requests)    
