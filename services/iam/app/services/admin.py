@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.security import hash_password
 from app.events.publisher import emit
-from app.models import Tenant, User, UserType
+from app.models import RefreshToken, Tenant, User, UserType
 from app.schemas.admin_schema import SuperAdminCreate
 
 _TENANT_TYPES = (UserType.TENANT_ADMIN, UserType.COORDINATOR)
@@ -83,6 +83,23 @@ def set_tenant_status(db: Session, tenant_id: uuid.UUID, status: str) -> Tenant 
     if tenant is None:
         return None
     tenant.status = status
+
+    if status in ("suspended", "disabled", "inactive"):
+        now = datetime.now(timezone.utc)
+        # Revoke all active refresh tokens for all users in this tenant
+        tenant_user_ids = select(User.id).where(User.tenant_id == tenant_id)
+        db.query(RefreshToken).filter(
+            RefreshToken.user_id.in_(tenant_user_ids),
+            RefreshToken.revoked_at.is_(None),
+        ).update({"revoked_at": now}, synchronize_session=False)
+
+        emit(
+            db,
+            routing_key="iam.tenant.deactivated",
+            tenant_id=tenant.id,
+            data={"tenant_id": str(tenant.id), "status": status, "occurred_at": now.isoformat()},
+        )
+
     emit(
         db,
         routing_key="iam.tenant.status_changed",
@@ -162,6 +179,43 @@ def set_user_status(db: Session, user_id: uuid.UUID, status: str) -> User | None
     if user is None:
         return None
     user.status = status
+
+    if status in ("disabled", "banned"):
+        now = datetime.now(timezone.utc)
+        db.query(RefreshToken).filter(
+            RefreshToken.user_id == user.id,
+            RefreshToken.revoked_at.is_(None),
+        ).update({"revoked_at": now}, synchronize_session=False)
+
+        emit(
+            db,
+            routing_key="iam.user.deactivated",
+            tenant_id=user.tenant_id,
+            data={
+                "user_id": str(user.id),
+                "tenant_id": str(user.tenant_id) if user.tenant_id else None,
+                "status": user.status,
+                "occurred_at": now.isoformat(),
+            },
+        )
+
+    emit(
+        db,
+        routing_key="iam.user.updated",
+        tenant_id=user.tenant_id,
+        data={
+            "user_id": str(user.id),
+            "tenant_id": str(user.tenant_id) if user.tenant_id else None,
+            "user_type": user.user_type.value,
+            "email": user.email,
+            "full_name": user.full_name,
+            "phone": user.phone,
+            "status": user.status,
+            "roles": user.roles,
+            "is_active": user.is_active,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        },
+    )
     db.commit()
     db.refresh(user)
     return user
@@ -242,3 +296,26 @@ def platform_stats(db: Session) -> dict:
         "tenants_last_30d": tenants_30d or 0,
         "users_last_30d": users_30d or 0,
     }
+
+
+def admin_reset_user_password(
+    db: Session, user_id: uuid.UUID, new_password: str
+) -> User | None:
+    user = db.scalars(
+        select(User)
+        .where(User.id == user_id)
+        .options(selectinload(User.role_assignments))
+    ).first()
+    if user is None:
+        return None
+    user.password_hash = hash_password(new_password)
+
+    now = datetime.now(timezone.utc)
+    db.query(RefreshToken).filter(
+        RefreshToken.user_id == user.id,
+        RefreshToken.revoked_at.is_(None),
+    ).update({"revoked_at": now}, synchronize_session=False)
+
+    db.commit()
+    db.refresh(user)
+    return user

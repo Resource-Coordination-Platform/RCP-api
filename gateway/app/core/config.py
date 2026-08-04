@@ -25,7 +25,7 @@ class Settings(BaseServiceSettings):
     PROXY_TIMEOUT_SECONDS: float = 30.0
 
     # 3000 = tenant-admin portal, 3001 = super-admin (platform operator) console
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3002"]
 
 
 settings = Settings()

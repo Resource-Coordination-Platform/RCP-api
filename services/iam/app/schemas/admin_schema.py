@@ -72,3 +72,7 @@ class PlatformStats(BaseModel):
     users_by_type: list[UserTypeCount]
     tenants_last_30d: int
     users_last_30d: int
+
+
+class AdminPasswordReset(BaseModel):
+    new_password: str = Field(min_length=10)
