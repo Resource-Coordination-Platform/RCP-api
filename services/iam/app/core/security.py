@@ -11,7 +11,7 @@ from passlib.context import CryptContext
 from app.core.config import settings
 from app.core.keys import get_key_manager
 
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")#Hash එකක් සාදද්දී Processors වලට අමතරව RAM Memory ප්‍රමාණයකුත් අනිවාර්යයෙන් භාවිතා කිරීමට සලස්වයි.
 
 
 def hash_password(password: str) -> str:
@@ -37,7 +37,7 @@ def create_access_token(
         "aud": settings.JWT_AUDIENCE,
         "iat": now,
         "exp": now + timedelta(minutes=settings.ACCESS_TOKEN_TTL_MINUTES),
-        "jti": str(uuid.uuid4()),
+        "jti": str(uuid.uuid4()),#Unique UUID එකක් (Token Reuse/Replay Attacks වළක්වා ගැනීමට).
     }
     if tenant_id is not None:
         claims["tenant_id"] = tenant_id
