@@ -35,8 +35,10 @@ class GlobalUserRegister(BaseModel):
     full_name: str
     phone: str | None = None
     user_type: UserType = Field(
-        description="Mobile actors only: VOLUNTEER, VICTIM or DONATOR"
+        description="Mobile actors only: VOLUNTEER, VICTIM "
     )
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 class TenantUserRegister(BaseModel):
@@ -64,6 +66,10 @@ class UserRead(BaseModel):
     status: str
     roles: list[str]
     created_at: datetime
+    latitude: float | None = None
+    longitude: float | None = None
+
+
 
 
 class LoginRequest(BaseModel):
