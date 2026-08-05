@@ -25,7 +25,7 @@ const (
 	reconnectSleep = 2 * time.Second
 )
 
-var bindings = []string{"logistics.#", "iam.user.deactivated", "iam.token.revoked"}
+var bindings = []string{"logistics.#", "iam.user.deactivated", "iam.token.revoked", "iam.tenant.deactivated", "iam.tenant.status_changed"}
 
 type envelope struct {
 	EventID       string          `json:"event_id"`
@@ -142,9 +142,9 @@ func (c *Consumer) handle(ctx context.Context, body []byte) error {
 	if err != nil {
 		return err
 	}
-	tenantID, err := uuid.Parse(env.TenantID)
-	if err != nil {
-		return err
+	var tenantID uuid.UUID
+	if env.TenantID != "" && env.TenantID != "null" {
+		tenantID, _ = uuid.Parse(env.TenantID)
 	}
 
 	switch env.EventType {
@@ -152,6 +152,8 @@ func (c *Consumer) handle(ctx context.Context, body []byte) error {
 		return c.onTaskAssigned(ctx, eventID, tenantID, env)
 	case "iam.user.deactivated", "iam.token.revoked":
 		return c.onRevocation(tenantID, env)
+	case "iam.tenant.deactivated", "iam.tenant.status_changed":
+		return c.onTenantDeactivated(tenantID, env)
 	default:
 		// every other logistics event feeds the offline sync log
 		return c.onGenericDomainEvent(ctx, eventID, tenantID, env)
@@ -266,6 +268,17 @@ func (c *Consumer) onRevocation(tenantID uuid.UUID, env envelope) error {
 	}
 	if data.JTI != "" {
 		c.verifier.DenyJTI(data.JTI, until)
+	}
+	return nil
+}
+
+func (c *Consumer) onTenantDeactivated(tenantID uuid.UUID, env envelope) error {
+	var data struct {
+		Status string `json:"status"`
+	}
+	_ = json.Unmarshal(env.Data, &data)
+	if data.Status != "active" {
+		c.hub.DropTenant(tenantID)
 	}
 	return nil
 }

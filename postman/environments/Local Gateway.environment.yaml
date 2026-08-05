@@ -5,12 +5,10 @@ values:
   - key: tenantSlug
     value: ''
   - key: assignmentId
-    value: ''
-  - key: categoryId
-    value: ''
+    value: 5e0eb204-5c91-463b-bea6-8e5cc6b9f55e
   - key: requestId
     value: ''
   - key: volunteerId
     value: ''
   - key: bearerToken
-    value: ''
+    secret: true

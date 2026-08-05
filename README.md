@@ -87,3 +87,20 @@ For the folder structure conventions per service, see
 
 
 ok now containers running smoothly
+
+
+
+
+If you need to create another Super Admin in the future:
+Install argon2-cffi (if running in a new environment):
+powershell
+
+
+pip install argon2-cffi
+Run the script:
+powershell
+
+
+cd "d:\Resource Coordination Platform\services\iam"
+$env:PYTHONPATH=".;..\..\packages\common"
+python -m scripts.bootstrap_superadmin --email newadmin@example.com --password "your-password-here-10chars"

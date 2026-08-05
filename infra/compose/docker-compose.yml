@@ -133,8 +133,8 @@ services:
     build: ../../services/rto
     environment:
       <<: *common-env
-      # iam:8001 කියන්නේ iam සර්විස් එකේ ඉන්ටර්නල් පෝට් එක newly addded
-      JWT_JWKS_URL: http://iam:8000/.well-known/jwks.json
+      # iam-service:8000 uses internal port 8000 of container_name iam-service
+      JWT_JWKS_URL: http://iam-service:8000/.well-known/jwks.json
       # JWT_JWKS_URL: http://172.19.0.4:8000/.well-known/jwks.json
       DATABASE_URL: postgres://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
 

@@ -9,6 +9,8 @@
     "tenant_id": { "type": "string", "format": "uuid" },
     "title": { "type": "string" },
     "source_district": { "type": "string" },
+    "latitude": { "type": ["number", "null"] },
+    "longitude": { "type": ["number", "null"] },
     "broadcast_type": { "type": "string", "enum": ["RADIUS_L1", "RADIUS_L2", "TARGETED"] },
     "resolved_districts": {
       "type": "array",

@@ -7,6 +7,7 @@ Two registration paths share one identity store:
 The DB CHECK constraint (ck_users_type_tenancy) backstops both paths.
 """
 
+import uuid
 from datetime import datetime, timedelta, timezone
 import math
 
@@ -34,6 +35,8 @@ from app.models import (
 from app.schemas.auth_schema import (
     GlobalUserRegister,
     LoginRequest,
+    PasswordChange,
+    ProfileUpdate,
     TenantOnboard,
     TenantUserRegister,
     TokenPair,
@@ -167,8 +170,10 @@ def login(db: Session, data: LoginRequest) -> TokenPair | None:
     unambiguous."""
     if data.tenant_slug is not None:
         tenant = db.scalars(select(Tenant).where(Tenant.slug == data.tenant_slug)).first()
-        if tenant is None or tenant.status != "active":
+        if tenant is None:
             return None
+        if tenant.status != "active":
+            raise ValueError("TENANT_SUSPENDED")
         user_filter = User.tenant_id == tenant.id
     else:
         user_filter = User.tenant_id.is_(None)
@@ -178,10 +183,12 @@ def login(db: Session, data: LoginRequest) -> TokenPair | None:
         .where(user_filter, User.email == data.email)
         .options(selectinload(User.role_assignments))
     ).first()
-    if user is None or not user.is_active:
+    if user is None:
         return None
     if not verify_password(data.password, user.password_hash):
         return None
+    if not user.is_active:
+        raise ValueError("USER_DISABLED")
     return _issue_pair(db, user)
 
 
@@ -248,3 +255,55 @@ def get_nearest_tenant_id(db: Session, lat: float, lon: float):
             nearest_tenant = t
             
     return nearest_tenant.id if nearest_tenant else None
+    
+
+
+def get_user_by_id(db: Session, user_id: uuid.UUID) -> User | None:
+    return db.scalars(
+        select(User)
+        .where(User.id == user_id)
+        .options(selectinload(User.role_assignments))
+    ).first()
+
+
+def update_user_profile(
+    db: Session, user_id: uuid.UUID, data: ProfileUpdate
+) -> User | None:
+    user = get_user_by_id(db, user_id)
+    if user is None:
+        return None
+    if data.full_name is not None:
+        user.full_name = data.full_name
+    if data.phone is not None:
+        user.phone = data.phone
+
+    emit(
+        db,
+        routing_key="iam.user.updated",
+        tenant_id=user.tenant_id,
+        data=_user_registered_payload(user),
+    )
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def change_user_password(
+    db: Session, user_id: uuid.UUID, data: PasswordChange
+) -> bool:
+    user = get_user_by_id(db, user_id)
+    if user is None:
+        return False
+    if not verify_password(data.current_password, user.password_hash):
+        raise ValueError("INVALID_CURRENT_PASSWORD")
+
+    user.password_hash = hash_password(data.new_password)
+
+    now = datetime.now(timezone.utc)
+    db.query(RefreshToken).filter(
+        RefreshToken.user_id == user.id,
+        RefreshToken.revoked_at.is_(None),
+    ).update({"revoked_at": now}, synchronize_session=False)
+
+    db.commit()
+    return True

@@ -80,7 +80,19 @@ func Handler(hub *Hub, verifier *auth.Verifier, st *store.Store, allowedOrigins 
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := tokenFromSubprotocol(r)
 		if token == "" {
-			http.Error(w, "missing bearer subprotocol", http.StatusUnauthorized)
+			token = r.URL.Query().Get("token")
+		}
+		if token == "" {
+			token = r.URL.Query().Get("access_token")
+		}
+		if token == "" {
+			authHeader := r.Header.Get("Authorization")
+			if strings.HasPrefix(strings.ToLower(authHeader), "bearer ") {
+				token = strings.TrimSpace(authHeader[7:])
+			}
+		}
+		if token == "" {
+			http.Error(w, "missing bearer token or subprotocol", http.StatusUnauthorized)
 			return
 		}
 		claims, err := verifier.Verify(token)
@@ -89,8 +101,10 @@ func Handler(hub *Hub, verifier *auth.Verifier, st *store.Store, allowedOrigins 
 			return
 		}
 
-		// echo the accepted subprotocol back, as RFC 6455 requires
-		responseHeader := http.Header{"Sec-WebSocket-Protocol": {"bearer"}}
+		var responseHeader http.Header
+		if r.Header.Get("Sec-WebSocket-Protocol") != "" {
+			responseHeader = http.Header{"Sec-WebSocket-Protocol": {"bearer"}}
+		}
 		conn, err := upgrader.Upgrade(w, r, responseHeader)
 		if err != nil {
 			return

@@ -75,6 +75,8 @@ def declare_event(
         source_district=data.source_district,
         broadcast_type=data.broadcast_type,
         target_districts=data.target_districts or [],
+        latitude=data.latitude,
+        longitude=data.longitude,
         requirements=[
             EventRequirement(skill=r.skill, required_count=r.required_count)
             for r in data.requirements
@@ -92,6 +94,8 @@ def declare_event(
             "tenant_id": str(tenant_id),
             "title": event.title,
             "source_district": event.source_district,
+            "latitude": event.latitude,
+            "longitude": event.longitude,
             "broadcast_type": event.broadcast_type.value,
             "resolved_districts": resolved,
             "requirements": [

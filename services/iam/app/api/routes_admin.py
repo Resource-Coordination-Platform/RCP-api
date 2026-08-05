@@ -14,6 +14,7 @@ from app.api.deps import Principal, require_super_admin
 from app.db.database import get_db
 from app.models.user import UserType
 from app.schemas.admin_schema import (
+    AdminPasswordReset,
     AdminUserRead,
     PlatformStats,
     SuperAdminCreate,
@@ -134,3 +135,17 @@ def create_super_admin(
     if user is None:
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
     return user
+
+
+@router.post("/users/{user_id}/reset-password")
+def reset_user_password(
+    user_id: uuid.UUID,
+    data: AdminPasswordReset,
+    db: Session = Depends(get_db),
+    _: Principal = Depends(require_super_admin),
+):
+    """Super-admin reset password for any user (e.g. setting a temporary password)."""
+    user = admin_service.admin_reset_user_password(db, user_id, data.new_password)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    return {"message": "Password reset successfully", "user_id": str(user_id)}

@@ -3,6 +3,7 @@
 package ws
 
 import (
+	"encoding/json"
 	"sync"
 
 	"github.com/google/uuid"
@@ -84,7 +85,38 @@ func (h *Hub) DropUser(tenantID, userID uuid.UUID) {
 		}
 	}
 	h.mu.RUnlock()
+
+	logoutMsg, _ := json.Marshal(map[string]any{
+		"type":   "force_logout",
+		"reason": "account_disabled",
+	})
+
 	for _, c := range victims {
+		c.TrySend(logoutMsg)
+		c.Close()
+	}
+}
+
+// DropTenant force-closes every socket of all users in a tenant (tenant suspension/deactivation).
+func (h *Hub) DropTenant(tenantID uuid.UUID) {
+	h.mu.RLock()
+	var victims []*Client
+	if users, ok := h.conns[tenantID]; ok {
+		for _, sockets := range users {
+			for c := range sockets {
+				victims = append(victims, c)
+			}
+		}
+	}
+	h.mu.RUnlock()
+
+	logoutMsg, _ := json.Marshal(map[string]any{
+		"type":   "force_logout",
+		"reason": "tenant_suspended",
+	})
+
+	for _, c := range victims {
+		c.TrySend(logoutMsg)
 		c.Close()
 	}
 }
