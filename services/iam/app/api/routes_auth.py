@@ -36,7 +36,7 @@ def register_global(data: GlobalUserRegister, db: Session = Depends(get_db)):
     if data.user_type not in GLOBAL_USER_TYPES:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "Mobile registration accepts VOLUNTEER, VICTIM or DONATOR only",
+            "Mobile registration accepts VOLUNTEER, VICTIM only",
         )
     if db.scalars(
         select(User).where(User.tenant_id.is_(None), User.email == data.email)
@@ -116,3 +116,4 @@ def list_tenant_locations(
         )
     ).all()
     return list(tenants)
+    
