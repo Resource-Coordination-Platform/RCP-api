@@ -1,4 +1,4 @@
-name: rcp
+name: rcp  #note:when you do a alembic migration please change database url from port 6543 to 5432 because in a migration pool connection(transition mode) not work...it require session mode with port 5432
 
 x-common-env: &common-env
   RABBITMQ_URL: amqp://rcp:rcp_local_pw@rabbitmq:5672/rcp
@@ -8,24 +8,14 @@ x-common-env: &common-env
   AUTO_CREATE_TABLES: "true"
 
 services:
-  # db:
-  #   # Plain Postgres is sufficient locally because services speak pure SQL.
-  #   # For full Supabase parity (dashboard, storage), run `supabase start`
-  #   # instead and point DATABASE_URLs at its exposed port.
-  #   image: postgres:16-alpine
-  #   environment:
-  #     POSTGRES_DB: rcp
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres_local_pw
-  #   ports: ["5432:5432"]
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  #     - ./db-init:/docker-entrypoint-initdb.d:ro
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U postgres -d rcp"]
-  #     interval: 5s
-  #     timeout: 3s
-  #     retries: 10
+
+  # අලුතෙන් මේක add කරන්න
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    # මෙතන 'api-gateway' වෙනුවට ඔයාගේ main service එකේ නම දෙන්න.
+    # '8000' වෙනුවට ඒක run වෙන port එක දෙන්න.
+    command: tunnel --url http://gateway:8000
+    restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -72,6 +62,8 @@ services:
       dockerfile: services/iam/Dockerfile
     environment:
       <<: *common-env
+      #:when you do a alembic migration please change database url from port 6543 to 5432 because in a migration pool connection(transition mode) not work...it require session mode with port 5432
+      # DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require 
       DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
       JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_signing_key
     
@@ -98,7 +90,8 @@ services:
       dockerfile: services/logistics/Dockerfile
     environment:
       <<: *common-env
-      DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
+      #DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
+      DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require 
     ports: ["8002:8000"]  
     depends_on:
       # db: { condition: service_healthy }
