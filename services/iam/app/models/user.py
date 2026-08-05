@@ -85,6 +85,12 @@ class User(Base, TimestampMixin):
         back_populates="user", cascade="all, delete-orphan"
     )
 
+    # අලුතින් එකතු කරපු Location සහ Assigned Tenant Columns
+    latitude: Mapped[float | None] = mapped_column(nullable=True)
+    longitude: Mapped[float | None] = mapped_column(nullable=True)
+    # මේක Main tenant_id එක නෙවෙයි, Victim ට Alerts යවන්න වෙන් කරපු ID එක
+    assigned_tenant_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+
     @property
     def is_global(self) -> bool:
         return self.tenant_id is None
