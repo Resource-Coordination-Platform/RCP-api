@@ -8,6 +8,7 @@ The DB CHECK constraint (ck_users_type_tenancy) backstops both paths.
 """
 
 from datetime import datetime, timedelta, timezone
+import math
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -105,6 +106,12 @@ def register_global_user(db: Session, data: GlobalUserRegister) -> User:
     """Mobile-app path: identity in the global pool, tenant_id stays NULL."""
     if data.user_type not in GLOBAL_USER_TYPES:
         raise ValueError(f"{data.user_type} must be registered under a tenant")
+
+    # 🚨 ළඟම Tenant ව හොයනවා (Latitude, Longitude තියෙනවා නම් විතරක්)
+    nearest_tenant_id = None
+    if data.latitude is not None and data.longitude is not None:
+        nearest_tenant_id = get_nearest_tenant_id(db, data.latitude, data.longitude)
+
     user = User(
         tenant_id=None,
         user_type=data.user_type,
@@ -112,6 +119,9 @@ def register_global_user(db: Session, data: GlobalUserRegister) -> User:
         password_hash=hash_password(data.password),
         full_name=data.full_name,
         phone=data.phone,
+        latitude=data.latitude,             # අලුතින්
+        longitude=data.longitude,           # අලුතින්
+        assigned_tenant_id=nearest_tenant_id # අලුතින් - ළඟම Tenant
     )
     db.add(user)
     db.flush()
@@ -125,11 +135,13 @@ def register_global_user(db: Session, data: GlobalUserRegister) -> User:
 
 
 def _issue_pair(db: Session, user: User, rotated_from=None) -> TokenPair:
+    #(Victim නම් assigned_tenant_id එක ගන්නවා, නැත්නම් සාමාන්‍ය tenant_id එක ගන්නවා)
+    effective_tenant_id = user.assigned_tenant_id or user.tenant_id
     access = create_access_token(
         user_id=str(user.id),
         user_type=user.user_type.value,
         roles=user.roles,
-        tenant_id=str(user.tenant_id) if user.tenant_id else None,
+        tenant_id=str(effective_tenant_id) if effective_tenant_id else None,
     )
     raw_refresh, refresh_hash = new_refresh_token()
     db.add(
@@ -145,6 +157,7 @@ def _issue_pair(db: Session, user: User, rotated_from=None) -> TokenPair:
         access_token=access,
         refresh_token=raw_refresh,
         expires_in=settings.ACCESS_TOKEN_TTL_MINUTES * 60,
+        tenant_id=effective_tenant_id # Frontend එකට ලේසි වෙන්න මෙතනත් යවනවා
     )
 
 
@@ -209,3 +222,29 @@ def refresh(db: Session, raw_token: str) -> TokenPair | None:
 def get_all_tenants(db: Session):
     # 'Tenant' Table එකේ තියෙන සේරම rows ටික අරන් List එකක් විදිහට දෙනවා
     return db.scalars(select(Tenant)).all()
+
+
+
+def get_nearest_tenant_id(db: Session, lat: float, lon: float):
+    """Haversine Formula එකෙන් ළඟම Tenant ව හොයන ෆන්ක්ෂන් එක"""
+    tenants = db.scalars(select(Tenant).where(Tenant.status == "active", Tenant.latitude.is_not(None))).all()
+    if not tenants:
+        return None
+    
+    nearest_tenant = None
+    min_dist = float('inf')
+    
+    for t in tenants:
+        # පෘථිවියේ අරය කිලෝමීටර් වලින්
+        R = 6371.0 
+        dlat = math.radians(t.latitude - lat)
+        dlon = math.radians(t.longitude - lon)
+        a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat)) * math.cos(math.radians(t.latitude)) * math.sin(dlon / 2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        distance = R * c
+        
+        if distance < min_dist:
+            min_dist = distance
+            nearest_tenant = t
+            
+    return nearest_tenant.id if nearest_tenant else None
