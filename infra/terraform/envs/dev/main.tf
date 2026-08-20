@@ -38,7 +38,7 @@ module "runtime" {
   subnets = module.network.private_subnets
 
   services = {
-    iam       = { image = "${module.registry.urls["iam"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 1, env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url } }
+    iam       = { image = "${module.registry.urls["iam"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 1, env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url }, secrets = { JWT_PRIVATE_KEY = module.secrets.arns["jwt-signing-key"] } }
     logistics = { image = "${module.registry.urls["logistics"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 2, env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url } }
     rto       = { image = "${module.registry.urls["rto"]}:${var.release}", port = 8080, cpu = 256, memory = 512, min = 1, max = 2, scale_metric = "connections", env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url } }
     analytics = { image = "${module.registry.urls["analytics"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 1, env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url } }
