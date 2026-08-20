@@ -14,8 +14,27 @@ sys.path.append(os.path.join(root_dir, "packages", "common"))
 sys.path.append(os.path.join(root_dir, "packages", "clients"))
 sys.path.append(os.path.join(root_dir, "packages", "contracts"))
 
+import tempfile
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
+# Generate a temporary RSA key for testing
+private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+pem = private_key.private_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.NoEncryption()
+)
+
+fd, path = tempfile.mkstemp(suffix=".pem")
+os.write(fd, pem)
+os.close(fd)
+os.environ["JWT_PRIVATE_KEY_PATH"] = path
+
 # Import the FastAPI app and dependencies
 from app.main import app
+from app.core.config import settings
+settings.JWT_PRIVATE_KEY_PATH = path
 from app.db.database import get_db
 from app.models import Base
 
