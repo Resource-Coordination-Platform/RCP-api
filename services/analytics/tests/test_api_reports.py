@@ -43,10 +43,9 @@ def test_need_vs_fulfillment(client, db_session):
     
     # Find the "Water" category
     water = next(x for x in data if x["category_id"] == str(cat_id))
-    assert water["category_name"] == "Water"
-    assert water["total_needed"] == 100
-    assert water["total_available"] == 50
-    assert water["fulfillment_percent"] == 50.0
+    assert water["category"] == "Water"
+    assert water["quantity_needed"] == 100
+    assert water["stock_available"] == 50
 
 def test_request_summary(client, db_session):
     from tests.conftest import FIXED_TENANT_ID

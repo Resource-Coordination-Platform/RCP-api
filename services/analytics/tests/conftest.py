@@ -18,6 +18,10 @@ sys.path.append(os.path.join(root_dir, "packages", "contracts"))
 from app.main import app
 from app.db.database import get_db
 from app.models import Base
+import uuid
+
+FIXED_USER_ID = uuid.uuid4()
+FIXED_TENANT_ID = uuid.uuid4()
 
 # Setup SQLite in-memory database for testing
 from sqlalchemy.ext.compiler import compiles
@@ -37,9 +41,10 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Remove schema for SQLite compatibility
-for table in Base.metadata.tables.values():
-    table.schema = None
+from sqlalchemy import text
+
+with engine.begin() as conn:
+    conn.execute(text("ATTACH DATABASE ':memory:' AS schema_analytics"))
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -80,9 +85,6 @@ def client(db_session):
     from app.api.dependencies import get_principal
     from rcp_common.auth import Principal
     import uuid
-
-    FIXED_USER_ID = uuid.uuid4()
-    FIXED_TENANT_ID = uuid.uuid4()
 
     def override_get_principal():
         # Default mock principal as tenant_admin
