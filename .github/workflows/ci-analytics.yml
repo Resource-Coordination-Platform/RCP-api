@@ -8,10 +8,7 @@ on:
       - "packages/contracts/**"
   push:
     branches: [main]
-    paths:
-      - "services/analytics/**"
-      - "packages/common/**"
-      - "packages/contracts/**"
+  workflow_dispatch:
 
 jobs:
   test:

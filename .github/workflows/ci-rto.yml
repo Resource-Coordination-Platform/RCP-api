@@ -7,9 +7,7 @@ on:
       - "packages/contracts/**"
   push:
     branches: [main]
-    paths:
-      - "services/rto/**"
-      - "packages/contracts/**"
+  workflow_dispatch:
 
 jobs:
   test:
