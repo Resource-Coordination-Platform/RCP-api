@@ -1,15 +1,15 @@
-name: ci-iam
+name: ci-volunteer
 
 on:
   pull_request:
     paths:
-      - "services/iam/**"
+      - "services/volunteer/**"
       - "packages/common/**"
       - "packages/contracts/**"
   push:
     branches: [main]
     paths:
-      - "services/iam/**"
+      - "services/volunteer/**"
       - "packages/common/**"
       - "packages/contracts/**"
 
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/iam
+        working-directory: services/volunteer
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -45,5 +45,5 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-      - run: docker build -f services/iam/Dockerfile -t ${{ steps.login-ecr.outputs.registry }}/rcp/iam:latest .
-      - run: docker push ${{ steps.login-ecr.outputs.registry }}/rcp/iam:latest
+      - run: docker build -f services/volunteer/Dockerfile -t ${{ steps.login-ecr.outputs.registry }}/rcp/volunteer:latest .
+      - run: docker push ${{ steps.login-ecr.outputs.registry }}/rcp/volunteer:latest
