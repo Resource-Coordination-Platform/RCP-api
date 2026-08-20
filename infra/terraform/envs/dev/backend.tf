@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "rcp-terraform-state"
+    bucket         = "rcp-terraform-state-576393818143"
     key            = "dev/terraform.tfstate"
     region         = "ap-south-1"
     dynamodb_table = "rcp-terraform-locks"
@@ -23,6 +23,4 @@ provider "cloudamqp" {
   apikey = var.cloudamqp_api_key
 }
 
-provider "supabase" {
-  access_token = var.supabase_access_token
-}
+
