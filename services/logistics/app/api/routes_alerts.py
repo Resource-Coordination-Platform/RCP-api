@@ -5,48 +5,85 @@ from sqlalchemy import select
 from app.db.database import get_db
 from app.api.dependencies import get_principal, require_roles
 from app.core.auth import Principal
+from app.events.publisher import emit
 from app.models.alert import DisasterAlert
 from app.schemas.alert_schema import DisasterAlertCreate, DisasterAlertRead
 
 router = APIRouter(prefix="/api/alerts", tags=["alerts"])
 
-# 1. Admin ට අලුත් Alert එකක් යවන්න (Dashboard එකෙන් කතා කරන්නේ මේකට)
+
 @router.post("", response_model=DisasterAlertRead, status_code=status.HTTP_201_CREATED)
 def create_alert(
     data: DisasterAlertCreate,
     db: Session = Depends(get_db),
-    # Admin (හෝ Coordinator) අයට විතරයි මේක කරන්න පුළුවන්
+    # principal for required roles
     principal: Principal = Depends(require_roles("tenant_admin", "coordinator")),
 ):
-    # Admin ට අනිවාර්යයෙන්ම Tenant ID එකක් තියෙන්න ඕනේ
+    # Admin need an tenant id
     if not principal.tenant_id:
         raise HTTPException(status_code=400, detail="Tenant ID missing in token")
         
     new_alert = DisasterAlert(
-        tenant_id=principal.tenant_id,  # Admin අයිති කඳවුරේ ID එක
+        tenant_id=principal.tenant_id,  
         title=data.title,
         message=data.message,
         severity=data.severity,
-        created_by=principal.user_id    # Alert එක හදපු Admin ගේ ID එක
+        created_by=principal.user_id    
     )
     
     db.add(new_alert)
+    db.flush()
+    # server_default(func.now()) values aren't loaded after flush —
+    # refresh fetches the DB-generated created_at for the emit payload.
+    db.refresh(new_alert)
+
+    from datetime import datetime, timezone
+    import logging
+    _log = logging.getLogger(__name__)
+
+    ts = (
+        new_alert.created_at.isoformat()
+        if new_alert.created_at
+        else datetime.now(timezone.utc).isoformat()
+    )
+
+    _log.info(
+        "Emitting logistics.alert.created for alert %s (tenant=%s)",
+        new_alert.id, principal.tenant_id,
+    )
+
+    # RabbitMQ outbox event → RTO consumer → WebSocket broadcast
+    emit(
+        db,
+        routing_key="logistics.alert.created",
+        tenant_id=principal.tenant_id,
+        data={
+            "alert_id": str(new_alert.id),
+            "tenant_id": str(principal.tenant_id),
+            "title": new_alert.title,
+            "message": new_alert.message,
+            "severity": new_alert.severity.value,
+            "created_by": str(new_alert.created_by),
+            "created_at": ts,
+        },
+    )
+
     db.commit()
     db.refresh(new_alert)
     return new_alert
 
 
-# 2. Victim ට තමන්ගේ ප්‍රදේශයට අදාළ Alerts ටික ගන්න (App එකේ Alerts Tab එකෙන් කතා කරන්නේ මේකට)
+# 2. For the victim to receive alerts relevant to their area (this refers to the 'Alerts' tab in the app).
 @router.get("", response_model=list[DisasterAlertRead])
 def get_alerts(
     db: Session = Depends(get_db),
-    principal: Principal = Depends(get_principal), # ලොග් වෙච්ච ඕනෑම කෙනෙක්ට පුළුවන්
+    principal: Principal = Depends(get_principal), # anyone can access this route who logged
 ):
-    # Token එකේ Tenant ID එකක් නැත්නම් (තාම ලොකේෂන් සෙට් වෙලා නැත්නම්) හිස් ලිස්ට් එකක් යවනවා
+    # send empty lost if tenant id missing
     if not principal.tenant_id:
         return []
         
-    # Victim ට අදාළ (Assigned) වෙලා තියෙන කඳවුරෙන් දාපු Alerts ටික විතරක් අලුත්ම එක උඩින් එන්න ෆිල්ටර් කරනවා
+    # query is filtering for only select principal tenant id matching alerts
     query = select(DisasterAlert).where(
         DisasterAlert.tenant_id == principal.tenant_id
     ).order_by(DisasterAlert.created_at.desc())
