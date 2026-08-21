@@ -26,11 +26,19 @@ locals {
   public_services = { for k, v in var.services : k => v if v.public }
 }
 
+resource "aws_service_discovery_http_namespace" "this" {
+  name        = "rcp-${var.env}"
+  description = "Service Connect namespace for RCP ${var.env}"
+}
+
 resource "aws_ecs_cluster" "this" {
   name = "rcp-${var.env}"
   setting {
     name  = "containerInsights"
     value = "enabled"
+  }
+  service_connect_defaults {
+    namespace = aws_service_discovery_http_namespace.this.arn
   }
 }
 
@@ -106,6 +114,7 @@ resource "aws_ecs_task_definition" "service" {
     image     = each.value.image
     essential = true
     portMappings = [{
+      name          = each.key
       containerPort = each.value.port
       protocol      = "tcp"
     }]
@@ -135,6 +144,19 @@ resource "aws_ecs_service" "service" {
   network_configuration {
     subnets         = var.subnets
     security_groups = [aws_security_group.service.id]
+  }
+
+  service_connect_configuration {
+    enabled   = true
+    namespace = aws_service_discovery_http_namespace.this.arn
+    service {
+      client_alias {
+        port     = each.value.port
+        dns_name = each.key
+      }
+      port_name      = each.key
+      discovery_name = each.key
+    }
   }
 
   dynamic "load_balancer" {
