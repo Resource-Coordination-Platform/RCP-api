@@ -3,5 +3,6 @@
     "python.analysis.extraPaths": [
         "./packages/common",
         "./packages/clients"
-    ]
+    ],
+    "workbench.colorTheme": "Dark Modern"
 }
