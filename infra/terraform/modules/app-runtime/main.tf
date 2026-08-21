@@ -1,6 +1,11 @@
 variable "env" { type = string }
 variable "vpc_id" { type = string }
 variable "subnets" { type = list(string) }
+variable "public_subnets" {
+  type    = list(string)
+  default = []
+}
+
 variable "services" {
   description = "Per-service runtime spec"
   type = map(object({
@@ -13,7 +18,17 @@ variable "services" {
     env          = optional(map(string), {})
     secrets      = optional(map(string), {}) # env var -> secrets manager ARN
     scale_metric = optional(string, "cpu")   # "cpu" | "connections"
+    public       = optional(bool, false)
   }))
+}
+
+locals {
+  public_services = { for k, v in var.services : k => v if v.public }
+}
+
+resource "aws_service_discovery_http_namespace" "this" {
+  name        = "rcp-${var.env}"
+  description = "Service Connect namespace for RCP ${var.env}"
 }
 
 resource "aws_ecs_cluster" "this" {
@@ -21,6 +36,9 @@ resource "aws_ecs_cluster" "this" {
   setting {
     name  = "containerInsights"
     value = "enabled"
+  }
+  service_connect_defaults {
+    namespace = aws_service_discovery_http_namespace.this.arn
   }
 }
 
@@ -44,9 +62,30 @@ resource "aws_iam_role_policy_attachment" "task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+data "aws_iam_policy_document" "task_execution_secrets" {
+  statement {
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "task_execution_secrets" {
+  name   = "rcp-${var.env}-task-exec-secrets"
+  role   = aws_iam_role.task_execution.name
+  policy = data.aws_iam_policy_document.task_execution_secrets.json
+}
+
 resource "aws_security_group" "service" {
   name   = "rcp-${var.env}-services"
   vpc_id = var.vpc_id
+
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = length(aws_security_group.alb) > 0 ? [aws_security_group.alb[0].id] : []
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -75,6 +114,7 @@ resource "aws_ecs_task_definition" "service" {
     image     = each.value.image
     essential = true
     portMappings = [{
+      name          = each.key
       containerPort = each.value.port
       protocol      = "tcp"
     }]
@@ -104,6 +144,28 @@ resource "aws_ecs_service" "service" {
   network_configuration {
     subnets         = var.subnets
     security_groups = [aws_security_group.service.id]
+  }
+
+  service_connect_configuration {
+    enabled   = true
+    namespace = aws_service_discovery_http_namespace.this.arn
+    service {
+      client_alias {
+        port     = each.value.port
+        dns_name = each.key
+      }
+      port_name      = each.key
+      discovery_name = each.key
+    }
+  }
+
+  dynamic "load_balancer" {
+    for_each = each.value.public ? [1] : []
+    content {
+      target_group_arn = aws_lb_target_group.public[each.key].arn
+      container_name   = each.key
+      container_port   = each.value.port
+    }
   }
 
   lifecycle {
@@ -143,3 +205,88 @@ resource "aws_appautoscaling_policy" "cpu" {
 
 output "cluster_name" { value = aws_ecs_cluster.this.name }
 output "security_group_id" { value = aws_security_group.service.id }
+
+resource "aws_security_group" "alb" {
+  count  = length(local.public_services) > 0 ? 1 : 0
+  name   = "rcp-${var.env}-alb"
+  vpc_id = var.vpc_id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_lb" "public" {
+  count              = length(local.public_services) > 0 ? 1 : 0
+  name               = "rcp-${var.env}-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb[0].id]
+  subnets            = var.public_subnets
+}
+
+resource "aws_lb_listener" "public" {
+  count             = length(local.public_services) > 0 ? 1 : 0
+  load_balancer_arn = aws_lb.public[0].arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Not Found"
+      status_code  = "404"
+    }
+  }
+}
+
+resource "aws_lb_target_group" "public" {
+  for_each    = local.public_services
+  name        = "rcp-${var.env}-${each.key}"
+  port        = each.value.port
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  health_check {
+    path                = "/health"
+    matcher             = "200-399"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+
+resource "aws_lb_listener_rule" "public" {
+  for_each     = local.public_services
+  listener_arn = aws_lb_listener.public[0].arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.public[each.key].arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+}
+
+output "alb_url" {
+  value = length(aws_lb.public) > 0 ? "http://${aws_lb.public[0].dns_name}" : ""
+}
+

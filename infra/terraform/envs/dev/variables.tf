@@ -8,11 +8,10 @@ variable "release" {
   type        = string
 }
 
-variable "supabase_org" { type = string }
-
-variable "supabase_access_token" {
-  type      = string
-  sensitive = true
+variable "manual_db_url" {
+  type        = string
+  sensitive   = true
+  description = "Connection string for the manually created Supabase DB"
 }
 
 variable "cloudamqp_api_key" {
@@ -20,4 +19,3 @@ variable "cloudamqp_api_key" {
   sensitive = true
 }
 
-variable "alarm_topic_arn" { type = string }

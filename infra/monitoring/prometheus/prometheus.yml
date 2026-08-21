@@ -3,33 +3,35 @@
 # until they land, the blackbox-style /readiness scrapes below still surface
 # liveness through the `up` metric per target.
 
+# Local Prometheus scrape config for the RCP stack.
+
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
 scrape_configs:
   - job_name: gateway
-    metrics_path: /readiness
+    metrics_path: /metrics
     static_configs:
       - targets: ["gateway:8000"]
 
   - job_name: iam
-    metrics_path: /readiness
+    metrics_path: /metrics
     static_configs:
       - targets: ["iam:8000"]
 
   - job_name: logistics
-    metrics_path: /readiness
+    metrics_path: /metrics
     static_configs:
       - targets: ["logistics:8000"]
 
   - job_name: analytics
-    metrics_path: /readiness
+    metrics_path: /metrics
     static_configs:
       - targets: ["analytics:8000"]
 
   - job_name: rto
-    metrics_path: /readiness
+    metrics_path: /metrics
     static_configs:
       - targets: ["rto:8080"]
 

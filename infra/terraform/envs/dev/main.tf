@@ -18,14 +18,7 @@ module "secrets" {
   ]
 }
 
-module "database" {
-  source            = "../../modules/database"
-  env               = "dev"
-  organization_slug = var.supabase_org
-  db_region         = var.aws_region
-  db_password       = module.secrets.values["db-master-password"]
-  bootstrap_sql     = file("${path.module}/../../../compose/db-init/01-schemas-roles.sql")
-}
+
 
 module "broker" {
   source = "../../modules/message-broker"
@@ -35,18 +28,26 @@ module "broker" {
 
 module "registry" {
   source = "../../modules/container-registry"
-  repos  = ["iam", "logistics", "rto"]
+  repos  = ["iam", "logistics", "rto", "analytics", "volunteer", "gateway"]
 }
 
 module "runtime" {
-  source  = "../../modules/app-runtime"
-  env     = "dev"
-  vpc_id  = module.network.vpc_id
-  subnets = module.network.private_subnets
+  source         = "../../modules/app-runtime"
+  env            = "dev"
+  vpc_id         = module.network.vpc_id
+  subnets        = module.network.private_subnets
+  public_subnets = module.network.public_subnets
 
   services = {
-    iam       = { image = "${module.registry.urls["iam"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 1 }
-    logistics = { image = "${module.registry.urls["logistics"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 2 }
-    rto       = { image = "${module.registry.urls["rto"]}:${var.release}", port = 8080, cpu = 256, memory = 512, min = 1, max = 2, scale_metric = "connections" }
+    iam       = { image = "${module.registry.urls["iam"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 1, env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url }, secrets = { JWT_PRIVATE_KEY = module.secrets.arns["jwt-signing-key"] } }
+    logistics = { image = "${module.registry.urls["logistics"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 2, env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url } }
+    rto       = { image = "${module.registry.urls["rto"]}:${var.release}", port = 8080, cpu = 256, memory = 512, min = 1, max = 2, scale_metric = "connections", env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url } }
+    analytics = { image = "${module.registry.urls["analytics"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 1, env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url } }
+    volunteer = { image = "${module.registry.urls["volunteer"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 1, env = { DATABASE_URL = var.manual_db_url, RABBITMQ_URL = module.broker.url } }
+    gateway   = { image = "${module.registry.urls["gateway"]}:${var.release}", port = 8000, cpu = 256, memory = 512, min = 1, max = 1, public = true, env = { ENVIRONMENT = "aws", IAM_URL = "http://iam:8000", LOGISTICS_URL = "http://logistics:8000", ANALYTICS_URL = "http://analytics:8000", VOLUNTEER_URL = "http://volunteer:8000", RTO_URL = "http://rto:8080" } }
   }
+}
+
+output "alb_url" {
+  value = module.runtime.alb_url
 }

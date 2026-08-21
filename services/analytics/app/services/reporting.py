@@ -58,17 +58,17 @@ _STATUS_SUMMARY_SQL = text(
 def need_vs_fulfillment(db: Session, tenant_id: uuid.UUID) -> list[dict]:
     rows = db.execute(
         _NEED_VS_FULFILLMENT_SQL,
-        {"tenant_id": tenant_id, "open_statuses": _OPEN_STATUSES},
+        {"tenant_id": tenant_id.hex, "open_statuses": _OPEN_STATUSES},
     ).all()
 
     stock_by_category = {
         row.category_id: int(row.stock_available)
-        for row in db.execute(_STOCK_SQL, {"tenant_id": tenant_id}).all()
+        for row in db.execute(_STOCK_SQL, {"tenant_id": tenant_id.hex}).all()
     }
 
     return [
         {
-            "category_id": str(row.category_id),
+            "category_id": str(uuid.UUID(row.category_id)) if isinstance(row.category_id, str) and len(row.category_id) == 32 else str(row.category_id),
             "category": row.category,
             "open_requests": row.open_requests,
             "fulfilled_requests": row.fulfilled_requests,
@@ -80,5 +80,5 @@ def need_vs_fulfillment(db: Session, tenant_id: uuid.UUID) -> list[dict]:
 
 
 def request_status_summary(db: Session, tenant_id: uuid.UUID) -> dict[str, int]:
-    rows = db.execute(_STATUS_SUMMARY_SQL, {"tenant_id": tenant_id}).all()
+    rows = db.execute(_STATUS_SUMMARY_SQL, {"tenant_id": tenant_id.hex}).all()
     return {row.status: row.total for row in rows}

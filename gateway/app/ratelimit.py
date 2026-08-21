@@ -97,6 +97,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return request.client.host if request.client else "unknown"
 
     async def dispatch(self, request: Request, call_next) -> Response:
+        if request.url.path == "/health":
+            return await call_next(request)
+
         client = self._client_key(request)
         if self._redis is not None:
             allowed = await self._allow_redis(client)

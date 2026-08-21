@@ -1,11 +1,11 @@
-name: ci-gateway
+name: ci-volunteer
 
 on:
   pull_request:
     paths:
-      - "gateway/**"
+      - "services/volunteer/**"
       - "packages/common/**"
-      - "packages/clients/**"
+      - "packages/contracts/**"
   push:
     branches: [main]
   workflow_dispatch:
@@ -15,14 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: gateway
+        working-directory: services/volunteer
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements.txt ../packages/common ../packages/clients
+      - run: pip install -r requirements.txt ../../packages/common
       - run: python -m pytest tests -q
+      - name: Verify ORM mappings configure
+        run: |
+          python -c "import app.models; from sqlalchemy.orm import configure_mappers; configure_mappers()"
 
   build:
     needs: test
@@ -39,5 +42,5 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-      - run: docker build -f gateway/Dockerfile -t ${{ steps.login-ecr.outputs.registry }}/rcp/gateway:latest .
-      - run: docker push ${{ steps.login-ecr.outputs.registry }}/rcp/gateway:latest
+      - run: docker build -f services/volunteer/Dockerfile -t ${{ steps.login-ecr.outputs.registry }}/rcp/volunteer:latest .
+      - run: docker push ${{ steps.login-ecr.outputs.registry }}/rcp/volunteer:latest

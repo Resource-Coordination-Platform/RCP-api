@@ -26,8 +26,15 @@ def _int_to_b64url(value: int) -> str:
 
 class KeyManager:
     def __init__(self, private_key_path: str):
-        with open(private_key_path, "rb") as fh:
-            self._private_key = serialization.load_pem_private_key(fh.read(), password=None)
+        # Allow passing the PEM directly via env var (useful for ECS/Secrets Manager)
+        import os
+        pem_content = os.getenv("JWT_PRIVATE_KEY")
+        if pem_content:
+            key_bytes = pem_content.encode("utf-8")
+        else:
+            with open(private_key_path, "rb") as fh:
+                key_bytes = fh.read()
+        self._private_key = serialization.load_pem_private_key(key_bytes, password=None)
 
         public_key = self._private_key.public_key()
         der = public_key.public_bytes(
