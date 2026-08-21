@@ -8,14 +8,7 @@ x-common-env: &common-env
   AUTO_CREATE_TABLES: "true"
 
 services:
-
-  # අලුතෙන් මේක add කරන්න
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    # මෙතන 'api-gateway' වෙනුවට ඔයාගේ main service එකේ නම දෙන්න.
-    # '8000' වෙනුවට ඒක run වෙන port එක දෙන්න.
-    command: tunnel --url http://gateway:8000
-    restart: unless-stopped
+ #no need cloudfared anymore since hosted the backend in AWS
 
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -90,8 +83,8 @@ services:
       dockerfile: services/logistics/Dockerfile
     environment:
       <<: *common-env
-      #DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
-      DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require 
+      DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
+      # DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require 
     ports: ["8002:8000"]  
     depends_on:
       # db: { condition: service_healthy }
