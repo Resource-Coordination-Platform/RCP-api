@@ -150,6 +150,8 @@ func (c *Consumer) handle(ctx context.Context, body []byte) error {
 	switch env.EventType {
 	case "logistics.task.assigned":
 		return c.onTaskAssigned(ctx, eventID, tenantID, env)
+	case "logistics.alert.created":
+		return c.onAlertCreated(ctx, eventID, tenantID, env)
 	case "iam.user.deactivated", "iam.token.revoked":
 		return c.onRevocation(tenantID, env)
 	case "iam.tenant.deactivated", "iam.tenant.status_changed":
@@ -212,6 +214,51 @@ func (c *Consumer) onTaskAssigned(ctx context.Context, eventID, tenantID uuid.UU
 		// no live socket -> push notification for the Flutter client
 		c.pusher.Send(ctx, tenantID, volunteerID, notification.Title, env.Data)
 	}
+	return nil
+}
+
+// onAlertCreated broadcasts disaster alerts to every connected user in
+// the tenant. The frame is sent in the flat shape the mobile AlertsScreen
+// renders directly (id, title, message, severity, created_at).
+func (c *Consumer) onAlertCreated(ctx context.Context, eventID, tenantID uuid.UUID, env envelope) error {
+	var data struct {
+		AlertID   string `json:"alert_id"`
+		Title     string `json:"title"`
+		Message   string `json:"message"`
+		Severity  string `json:"severity"`
+		CreatedBy string `json:"created_by"`
+		CreatedAt string `json:"created_at"`
+	}
+	if err := json.Unmarshal(env.Data, &data); err != nil {
+		return err
+	}
+
+	fresh, err := c.store.ProcessEvent(ctx, eventID, func(tx pgx.Tx) error {
+		return c.store.AppendSyncEvent(ctx, tx, &store.SyncEvent{
+			TenantID:   tenantID,
+			EntityType: "alert",
+			EntityID:   data.AlertID,
+			Op:         "created",
+			Payload:    env.Data,
+		})
+	})
+	if err != nil || !fresh {
+		return err
+	}
+
+	// Broadcast to ALL connected users in this tenant — alerts are
+	// tenant-wide, not targeted at a single user.
+	frame, _ := json.Marshal(map[string]any{
+		"type":       "alert",
+		"id":         data.AlertID,
+		"title":      data.Title,
+		"message":    data.Message,
+		"severity":   data.Severity,
+		"created_by": data.CreatedBy,
+		"created_at": data.CreatedAt,
+	})
+	slog.Info("broadcasting alert", "tenant", tenantID, "alert_id", data.AlertID)
+	c.hub.BroadcastTenant(tenantID, frame)
 	return nil
 }
 
