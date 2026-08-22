@@ -15,10 +15,13 @@ from app.schemas.auth_schema import (
     TenantOnboard,
     TenantRead,
     TenantUserRegister,
+    TenantLocationRead,  #new added by Kesh
     TokenPair,
     UserRead,
 )
 from app.services import auth as auth_service 
+
+
 
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -37,7 +40,7 @@ def register_global(data: GlobalUserRegister, db: Session = Depends(get_db)):
     if data.user_type not in GLOBAL_USER_TYPES:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "Mobile registration accepts VOLUNTEER, VICTIM or DONATOR only",
+            "Mobile registration accepts VOLUNTEER, VICTIM only",
         )
     if db.scalars(
         select(User).where(User.tenant_id.is_(None), User.email == data.email)
@@ -110,8 +113,28 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
 @router.get("/tenants", response_model=list[TenantRead])
 def get_tenants(db: Session = Depends(get_db)):
     """මෙමඟින් සියලුම Tenants ලාගේ ලැයිස්තුව ලබාදේ."""
+    # අපි කලින් auth.py එකේ ලියපු function එකට කතා කරනවා
     return auth_service.get_all_tenants(db)
 
+
+
+@router.get("/tenants/locations", response_model=list[TenantLocationRead])
+def list_tenant_locations(
+    db: Session = Depends(get_db),
+    
+):
+    """Map එකේ පෙන්වන්න Location තියෙන Active Tenants (සංවිධාන) ඔක්කොම ගන්නවා"""
+    tenants = db.scalars(
+        select(Tenant)
+        .where(
+            Tenant.status == "active",
+            Tenant.latitude.is_not(None),
+            Tenant.longitude.is_not(None)
+        )
+    ).all()
+    return list(tenants)
+    
+    
 
 @router.get("/me", response_model=UserRead)
 def get_current_user_profile(

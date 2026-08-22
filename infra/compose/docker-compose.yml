@@ -1,4 +1,4 @@
-name: rcp
+name: rcp  #note:when you do a alembic migration please change database url from port 6543 to 5432 because in a migration pool connection(transition mode) not work...it require session mode with port 5432
 
 x-common-env: &common-env
   RABBITMQ_URL: amqp://rcp:rcp_local_pw@rabbitmq:5672/rcp
@@ -8,24 +8,7 @@ x-common-env: &common-env
   AUTO_CREATE_TABLES: "true"
 
 services:
-  db:
-    # Plain Postgres is sufficient locally because services speak pure SQL.
-    # For full Supabase parity (dashboard, storage), run `supabase start`
-    # instead and point DATABASE_URLs at its exposed port.
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: rcp
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_local_pw
-    ports: ["5432:5432"]
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./db-init:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d rcp"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+ #no need cloudfared anymore since hosted the backend in AWS
 
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -72,7 +55,9 @@ services:
       dockerfile: services/iam/Dockerfile
     environment:
       <<: *common-env
-      DATABASE_URL: ${IAM_DATABASE_URL}
+      #:when you do a alembic migration please change database url from port 6543 to 5432 because in a migration pool connection(transition mode) not work...it require session mode with port 5432
+      # DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require 
+      DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
       JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_signing_key
     
     container_name: iam-service  #last try meka
@@ -88,7 +73,7 @@ services:
 
 
     depends_on:
-      db: { condition: service_healthy }
+      # db: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
     secrets: [jwt_signing_key]
 
@@ -98,10 +83,11 @@ services:
       dockerfile: services/logistics/Dockerfile
     environment:
       <<: *common-env
-      DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres
+      DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
+      # DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require 
     ports: ["8002:8000"]  
     depends_on:
-      db: { condition: service_healthy }
+      # db: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
       iam: { condition: service_started }
 
@@ -114,7 +100,7 @@ services:
       DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres
     ports: ["8003:8000"]
     depends_on:
-      db: { condition: service_healthy }
+      # db: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
       iam: { condition: service_started }
       logistics: { condition: service_started }
@@ -128,11 +114,12 @@ services:
       dockerfile: services/volunteer/Dockerfile
     environment:
       <<: *common-env
-      DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres
+      DATABASE_URL: postgresql+psycopg2://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
+
 
     ports: ["8004:8000"]
     depends_on:
-      db: { condition: service_healthy }
+      # db: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
       iam: { condition: service_started }
 
@@ -143,7 +130,7 @@ services:
       # iam-service:8000 uses internal port 8000 of container_name iam-service
       JWT_JWKS_URL: http://iam-service:8000/.well-known/jwks.json
       # JWT_JWKS_URL: http://172.19.0.4:8000/.well-known/jwks.json
-      DATABASE_URL: postgres://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:5432/postgres
+      DATABASE_URL: postgres://postgres.cjhshltpumlvjitlhirv:seneheyathra2026@aws-1-ap-south-1.pooler.supabase.com:6543/postgres 
 
       # extra_hosts:
       #   "iam:172.19.0.4"
@@ -153,7 +140,7 @@ services:
     ports: ["8080:8080"]
     depends_on:
       iam: { condition: service_started }
-      db: { condition: service_healthy }
+      # db: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
       
 

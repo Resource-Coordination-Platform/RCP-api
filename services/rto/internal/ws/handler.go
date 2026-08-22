@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -49,32 +50,14 @@ func newUpgrader(allowedOrigins []string) websocket.Upgrader {
 // }
 
 
-
-
 func tokenFromSubprotocol(r *http.Request) string {
-    // ඔක්කොම Sec-WebSocket-Protocol headers අරගන්නවා
-    protocols := r.Header["Sec-WebSocket-Protocol"]
-    
-    for _, p := range protocols {
-        parts := strings.Split(p, ",")
-        for _, part := range parts {
-            s := strings.TrimSpace(part)
-            if strings.HasPrefix(s, "bearer") {
-                // "bearer <token>" වගේ තියෙනවා නම් ඒක වෙන් කරගන්නවා
-                tokenParts := strings.Split(s, " ")
-                if len(tokenParts) == 2 {
-                    return tokenParts[1]
-                }
-                // සමහරවිට "bearer,<token>" වගේ නම්
-                return strings.TrimPrefix(s, "bearer")
-            }
-        }
-    }
-    return ""
+	header := r.Header.Get("Sec-WebSocket-Protocol")
+	parts := strings.Split(header, ",")
+	if len(parts) >= 2 && strings.TrimSpace(parts[0]) == "bearer" {
+		return strings.TrimSpace(parts[1])
+	}
+	return ""
 }
-
-
-
 func Handler(hub *Hub, verifier *auth.Verifier, st *store.Store, allowedOrigins []string) http.HandlerFunc {
 	upgrader := newUpgrader(allowedOrigins)
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -92,11 +75,13 @@ func Handler(hub *Hub, verifier *auth.Verifier, st *store.Store, allowedOrigins 
 			}
 		}
 		if token == "" {
+			slog.Warn("ws: missing bearer token", "remote", r.RemoteAddr)
 			http.Error(w, "missing bearer token or subprotocol", http.StatusUnauthorized)
 			return
 		}
 		claims, err := verifier.Verify(token)
 		if err != nil {
+			slog.Warn("ws: invalid token", "remote", r.RemoteAddr, "err", err)
 			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
 		}
@@ -107,8 +92,10 @@ func Handler(hub *Hub, verifier *auth.Verifier, st *store.Store, allowedOrigins 
 		}
 		conn, err := upgrader.Upgrade(w, r, responseHeader)
 		if err != nil {
+			slog.Error("ws: upgrade failed", "remote", r.RemoteAddr, "err", err)
 			return
 		}
+		slog.Info("ws: client connected", "user", claims.UserID, "tenant", claims.TenantID, "remote", r.RemoteAddr)
 		NewClient(hub, conn, st, claims.TenantID, claims.UserID).Run()
 	}
 }

@@ -7,6 +7,7 @@ from app.models.task import DispatchTask, TaskStatus
 from app.models.user_replica import UserReplica
 from app.models.volunteer import AvailabilityStatus, VolunteerProfile, VolunteerSkill
 from app.models.payment_donation import PaymentDonation, PaymentStatus
+from app.models.alert import DisasterAlert, AlertSeverity
 
 __all__ = [
     "Base",
@@ -26,6 +27,8 @@ __all__ = [
     "AvailabilityStatus",
     "Outbox",
     "ProcessedEvent",
-    "PaymentDonation",  # <--- අලුතින් දැම්මේ
-    "PaymentStatus",    # <--- අලුතින් දැම්මේ
+    "PaymentDonation",  
+    "PaymentStatus",    
+    "DisasterAlert",
+    "AlertSeverity"
 ]

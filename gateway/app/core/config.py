@@ -43,4 +43,5 @@ ROUTE_TABLE: dict[str, str] = {
     # volunteer-service (longest prefix wins, so /api/volunteers above
     # still routes to logistics' legacy operational profiles)
     "/api/volunteer": settings.VOLUNTEER_URL,
+    "/api/alerts": settings.LOGISTICS_URL,
 }

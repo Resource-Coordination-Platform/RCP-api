@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timezone
 
 import pika
+# pyrefly: ignore [missing-import]
 from sqlalchemy import select
 
 from app.core.config import settings
@@ -33,6 +34,7 @@ def _drain_once(channel) -> int:
             )
         )
         for row in rows:
+            log.info("publishing event %s [%s]", row.event_id, row.routing_key)
             channel.basic_publish(
                 exchange=settings.EVENTS_EXCHANGE,
                 routing_key=row.routing_key,

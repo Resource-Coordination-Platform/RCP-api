@@ -20,7 +20,16 @@ type Store struct {
 }
 
 func New(ctx context.Context, dsn string) (*Store, error) {
-	pool, err := pgxpool.New(ctx, dsn)
+	cfg, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		return nil, err
+	}
+	// Supabase PgBouncer (transaction mode, port 6543) does not support
+	// prepared statements. Use simple protocol to avoid
+	// "prepared statement does not exist" errors.
+	cfg.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
+
+	pool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
