@@ -44,4 +44,6 @@ ROUTE_TABLE: dict[str, str] = {
     # still routes to logistics' legacy operational profiles)
     "/api/volunteer": settings.VOLUNTEER_URL,
     "/api/alerts": settings.LOGISTICS_URL,
+    "/api/safe-zones": settings.LOGISTICS_URL,
+    "/api/payments": settings.LOGISTICS_URL,
 }
