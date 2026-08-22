@@ -8,6 +8,7 @@ from app.models.user_replica import UserReplica
 from app.models.volunteer import AvailabilityStatus, VolunteerProfile, VolunteerSkill
 from app.models.payment_donation import PaymentDonation, PaymentStatus
 from app.models.alert import DisasterAlert, AlertSeverity
+from app.models.safezones import SafeZone
 
 __all__ = [
     "Base",
@@ -30,5 +31,6 @@ __all__ = [
     "PaymentDonation",  
     "PaymentStatus",    
     "DisasterAlert",
-    "AlertSeverity"
+    "AlertSeverity",
+    "SafeZone"
 ]
