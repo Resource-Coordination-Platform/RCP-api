@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin
 
-# Severity එකට Enum එකක් හදාගමු (වැරදි අගයන් වැටෙන එක නවත්වන්න)
+# make enum for Severity 
 class AlertSeverity(str, enum.Enum):
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
@@ -15,12 +15,12 @@ class AlertSeverity(str, enum.Enum):
 class DisasterAlert(Base, TimestampMixin):
     __tablename__ = "disaster_alerts"
     
-    # මේක අයිති Logistics Schema එකට
+    # table arg means it's belong schema
     __table_args__ = {"schema": "schema_logistics"}
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
-    # මේ Alert එක අදාළ වෙන්නේ මොන Tenant (කඳවුරටද) කියන එක
+    # which tenant belong this alert
     tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True, nullable=False)
     
     title: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -32,5 +32,5 @@ class DisasterAlert(Base, TimestampMixin):
         nullable=False
     )
     
-    # මේක හැදුව Admin ගේ ID එක (මෙතන ForeignKey ගහන්නේ නෑ, මොකද User ඉන්නේ IAM Schema එකේ නිසා)
+    # we cant make foriegn key here because user table in another service(IAM)
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)

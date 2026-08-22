@@ -13,8 +13,8 @@ router = APIRouter(prefix="/api/payments", tags=["payments"])
 def create_checkout(
     data: PaymentCheckoutRequest,
     db: Session = Depends(get_db),
-    # Volunteer ට විතරයි සල්ලි ගෙවන්න පුළුවන්
+    # Volunteer only can accees this endpoint
     principal: Principal = Depends(require_roles("volunteer")),
 ):
-    """App එකෙන් PayHere එකට යන්න ඕනේ කරන Hash එක හදලා දෙනවා"""
+    #create hash that need for payhere
     return payment_service.create_checkout_session(db, data.tenant_id, principal.user_id, data)
