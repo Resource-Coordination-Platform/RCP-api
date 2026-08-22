@@ -7,7 +7,7 @@ from rcp_common.logging import configure_logging
 from rcp_common.middleware import RequestContextMiddleware
 from rcp_common.metrics import render_prometheus_metrics
 
-from app.api import routes_inventory, routes_requests, routes_volunteers,routes_payments,routes_alerts
+from app.api import routes_inventory, routes_requests, routes_volunteers,routes_payments,routes_alerts,routes_safezones
 from app.core.config import settings
 from app.db.database import engine
 from app.events.consumers.iam import start_consumer
@@ -39,7 +39,8 @@ app.include_router(routes_requests.router)
 app.include_router(routes_inventory.router)
 app.include_router(routes_volunteers.router)
 app.include_router(routes_payments.router)
-app.include_router(routes_alerts.router)    
+app.include_router(routes_alerts.router)  
+app.include_router(routes_safezones.router)  
 
 def _database_ready() -> bool:
     try:
